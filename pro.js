@@ -7,7 +7,18 @@ let book=null,parsed=null,reportOpen=false,profileError='',readVersion=0,rawProf
 const pro=()=>E.hasPro();
 let preview=new URLSearchParams(location.search).get('preview')==='pro';try{preview=preview||localStorage.getItem(PREVIEW)==='true';rawProfiles=localStorage.getItem(KEY);if(rawProfiles)book=P.readBook(JSON.parse(rawProfiles),A.normalize);}catch{try{if(rawProfiles)localStorage.setItem(KEY+'-recovery',rawProfiles);}catch{}profileError='Saved profiles could not be read. Your current lab was kept; use a share link or CSV to back it up.';}
 E.setPreview(preview);
-function saveBook(){if(!book)return;try{localStorage.setItem(KEY,JSON.stringify(book));return true;}catch{$('profileMessage').textContent='Browser storage could not save your profiles. Keep a CSV or share link before leaving.';return false;}}
+const SAVE_PAUSE=400;
+let bookTimer=0;
+function writeBook(){
+ bookTimer=0;
+ if(!book)return;
+ try{localStorage.setItem(KEY,JSON.stringify(book));return true;}catch{$('profileMessage').textContent='Browser storage could not save your profiles. Keep a CSV or share link before leaving.';return false;}
+}
+function saveBook(){clearTimeout(bookTimer);return writeBook();}
+function scheduleBook(){if(!book)return;clearTimeout(bookTimer);bookTimer=setTimeout(writeBook,SAVE_PAUSE);}
+function flushBook(){if(bookTimer)saveBook();}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushBook();});
+window.addEventListener('pagehide',flushBook);
 function ensureBook(){if(!book){book=P.createBook(A.getState());saveBook();}}
 // The legacy active-state key remains a compatibility mirror and share-link target.
 if(book){if(A.getStateOrigin()==='demo'){A.replaceState(P.active(book).state);A.toast('Recovered your active lab from saved profiles.');}else P.active(book).state=A.getState();}else if(pro())ensureBook();
@@ -37,6 +48,6 @@ function openReport(){if(!guard())return false;reportOpen=true;document.body.cla
 $('showReport').addEventListener('click',()=>{if(openReport())$('printReport').scrollIntoView({block:'start',behavior:'instant'});});
 $('printReportButton').addEventListener('click',async()=>{if(!openReport())return;try{if(window.NativePrintReport)await window.NativePrintReport();else window.print();}catch{A.toast('Printing was cancelled or unavailable. You can still review the report below.');}});
 window.addEventListener('beforeprint',renderReport);
-window.addEventListener('power:change',()=>{if(book){P.active(book).state=A.getState();saveBook();}if(pro()){renderSchedules();renderCompare();renderReport();}});
+window.addEventListener('power:change',()=>{if(book){P.active(book).state=A.getState();scheduleBook();}if(pro()){renderSchedules();renderCompare();renderReport();}});
 gate();if(book)saveBook();
 })();

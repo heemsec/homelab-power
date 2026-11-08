@@ -31,13 +31,22 @@ const money=v=>new Intl.NumberFormat(undefined,{style:'currency',currency:state.
 const number=(v,digits=2)=>new Intl.NumberFormat(undefined,{maximumFractionDigits:digits}).format(v);
 let toastTimer;
 function toast(text){$('toast').textContent=text;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',4500);}
-function persist(){
+const SAVE_PAUSE=400;
+let saveTimer=0;
+function writeState(){
+ saveTimer=0;
  let local=true;try{localStorage.setItem(STORE,JSON.stringify(state));}catch{local=false;}
  $('saveStatus').textContent=local?'Saved on this device':'Browser storage unavailable; use a share link';
- // A hash is never sent to a server; this updates the current entry, not browser history.
+}
+// Typing updates memory and the share hash immediately. localStorage waits until typing pauses. Closing, hiding, or leaving the tab flushes that same write.
+function flushState(){if(!saveTimer)return;clearTimeout(saveTimer);writeState();}
+function persist(){
  try{history.replaceState(null,'',`${location.pathname}${location.search}#s=${encode(state)}`);}catch{/* Share still works. */}
  window.dispatchEvent(new Event('power:change'));
+ clearTimeout(saveTimer);saveTimer=setTimeout(writeState,SAVE_PAUSE);
 }
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushState();});
+window.addEventListener('pagehide',flushState);
 function renderInputs(){
  for(const key of ['currency','rate','offRate','peakRate','peakStart','peakEnd','offStart','offEnd','consolidateWatts','replacementWatts','price'])$(key).value=state[key];
  $('tou').checked=state.tou;renderRegion();toggleRates();renderDevices();renderResults();
