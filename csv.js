@@ -1,0 +1,10 @@
+/* Exact values, RFC 4180 escaping, and reversible formula-safe names. */
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./math.js'));else root.PowerCSV=factory(root.PowerMath);})(typeof globalThis!=='undefined'?globalThis:this,function(M){
+ const dangerous=s=>/^[\s\uFEFF]*[=+@-]/.test(String(s));
+ function cell(v){let s=String(v??'');if(dangerous(s)&&typeof v!=='number')s="'"+s;return '"'+s.replace(/"/g,'""')+'"';}
+ function rows(s){const base=M.integrate(s.devices,s);const rate=s.tou?`TOU: off-peak ${s.offRate}; peak ${s.peakRate}; peak ${s.peakStart} to ${s.peakEnd} (decimal hours)`:`Flat: ${s.rate}`;
+ const header=['Device','Currency','Daily kWh','Daily cost','Monthly kWh','Monthly cost','Yearly kWh','Yearly cost','Rate used (currency/kWh)','Record type','Device ID','Idle W','Load W','At load %','Hours/day','Starts at','Separate weekend schedule','Weekend hours/day','Weekend starts at','Use in scenarios','Rate source ID','Off from','Back on at','Consolidation W','Replacement W','Purchase cost','Name escaped'];
+ const record=(name,d,device)=>[name,s.currency,d.kwh,d.cost,d.kwh*M.MONTH_DAYS,d.cost*M.MONTH_DAYS,d.kwh*365,d.cost*365,rate,device?'device':'total',device?.id??'',device?.idle??'',device?.load??'',device?.loadPct??'',device?.hours??'',device?.start??'',device?.separateWeekend??false,device?.weekendHours??device?.hours??'',device?.weekendStart??device?.start??'',device?.selected??false,s.region||'',s.offStart??0,s.offEnd??7,s.consolidateWatts??55,s.replacementWatts??25,s.price??350,device?dangerous(name):false];
+ return [header,...base.devices.map((d,i)=>record(s.devices[i].name,d,s.devices[i])),record('TOTAL',base)];}
+ return {cell,rows,dangerous,export:s=>'\uFEFF'+rows(s).map(r=>r.map(cell).join(',')).join('\r\n')+'\r\n'};
+});

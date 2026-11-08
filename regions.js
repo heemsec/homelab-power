@@ -1,0 +1,15 @@
+/* Offline, manually verified source snapshot, checked 2026-11-07.
+ * EIA Table 5.6.A: August 2026 residential cents/kWh, preliminary;
+ * released 2026-10-23. Converted to USD/kWh by dividing by 100.
+ * Eurostat news release 2026-10-30: H1 2026 household EUR/kWh,
+ * all taxes included; values rounded to eurocents as published.
+ * Only verified euro-currency countries from that release are included.
+ * Averages may spread fixed charges across consumption; not marginal tariffs.
+ */
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.RegionRates=factory();})(typeof globalThis!=='undefined'?globalThis:this,function(){
+ const eia={source:'US EIA · Table 5.6.A',url:'https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_5_6_a',period:'August 2026 (preliminary)',published:'2026-10-23',note:'Residential average revenue per kWh; fixed charges may be included.'};
+ const eurostat={source:'Eurostat',url:'https://ec.europa.eu/eurostat/web/products-eurostat-news/w/ddn-20261030-2',period:'January–June 2026',published:'2026-10-30',note:'Household average, all taxes included; rounded to eurocents in the release.'};
+ const states=[['AL','Alabama',16.33],['AK','Alaska',29.41],['AZ','Arizona',15.05],['AR','Arkansas',14.37],['CA','California',29.75],['CO','Colorado',17.17],['CT','Connecticut',24.51],['DE','Delaware',18.70],['DC','District of Columbia',25.98],['FL','Florida',14.99],['GA','Georgia',15.90],['HI','Hawaii',47.18],['ID','Idaho',13.37],['IL','Illinois',19.32],['IN','Indiana',17.02],['IA','Iowa',17.06],['KS','Kansas',15.47],['KY','Kentucky',13.80],['LA','Louisiana',12.87],['ME','Maine',32.11],['MD','Maryland',21.40],['MA','Massachusetts',30.48],['MI','Michigan',22.99],['MN','Minnesota',17.20],['MS','Mississippi',14.43],['MO','Missouri',16.02],['MT','Montana',15.57],['NE','Nebraska',13.54],['NV','Nevada',12.72],['NH','New Hampshire',27.64],['NJ','New Jersey',24.61],['NM','New Mexico',16.51],['NY','New York',28.65],['NC','North Carolina',14.95],['ND','North Dakota',13.31],['OH','Ohio',19.38],['OK','Oklahoma',14.82],['OR','Oregon',15.92],['PA','Pennsylvania',21.77],['RI','Rhode Island',28.18],['SC','South Carolina',15.76],['SD','South Dakota',15.15],['TN','Tennessee',13.42],['TX','Texas',15.91],['UT','Utah',13.31],['VT','Vermont',23.84],['VA','Virginia',17.64],['WA','Washington',14.63],['WV','West Virginia',16.31],['WI','Wisconsin',19.41],['WY','Wyoming',14.43]];
+ const regions=[{id:'US',country:'US',name:'United States · national average',currency:'USD',rate:.1816,...eia},...states.map(([code,name,cents])=>({id:'US-'+code,country:'US',name,currency:'USD',rate:Number((cents/100).toFixed(4)),...eia})),...[['DE','Germany',.36],['IE','Ireland',.39],['BE','Belgium',.36],['MT','Malta',.13]].map(([id,name,rate])=>({id,country:id,name,currency:'EUR',rate,...eurostat}))];
+ return {regions,countries:[['US','United States'],['BE','Belgium'],['DE','Germany'],['IE','Ireland'],['MT','Malta']],checked:'2026-11-07'};
+});
