@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Defaults, theme, and a backup of everything Homelab Power stores on this device.">
+<meta name="theme-color" content="#0b1215"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Homelab Power"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<script src="theme.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="ui.css"><script defer src="pwa.js"></script><script defer src="settings.js"></script>
+<title>Settings · Homelab Power</title>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="index.html" aria-label="Homelab Power, calculator"><span class="logo">ϟ</span> HOMELAB <b>POWER</b></a><span class="privacy"><span class="dot"></span> On this device. No tracking.</span></header>
+<nav class="sitenav" aria-label="Sections"><a href="index.html">Calculator</a><a href="planner.html">Planner</a><a href="settings.html" aria-current="page">Settings</a></nav>
+<main>
+<p class="eyebrow">SETTINGS</p>
+<h1>Defaults for the next lab</h1>
+<p class="help">A lab you've already saved keeps its own rate until you change it on the calculator. A new one starts here. <span id="saveStatus" role="status">Saved on this device.</span></p>
+<section class="card" aria-labelledby="defaultsTitle"><h2 id="defaultsTitle">Rate, numbers, look</h2>
+<div class="settings-grid">
+<label>Currency<select id="currency"><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option><option value="GBP">GBP (£)</option><option value="CAD">CAD ($)</option><option value="AUD">AUD ($)</option><option value="JPY">JPY (¥)</option><option value="INR">INR (₹)</option></select></label>
+<label>Default rate per kWh<input id="rate" type="text" inputmode="decimal" aria-describedby="rateHint"></label>
+<label>Number format<select id="numberFormat"><option value="auto">However this device does it</option><option value="us">1,234.56</option><option value="eu">1.234,56</option></select></label>
+<div class="choice-stack" role="radiogroup" aria-label="Theme"><span>Theme</span><label class="toggle"><input type="radio" name="theme" value="system"> Match the device</label><label class="toggle"><input type="radio" name="theme" value="light"> Light</label><label class="toggle"><input type="radio" name="theme" value="dark"> Dark</label></div>
+<label>Default mains<select id="voltageMode"><option value="120">120 V</option><option value="230">230 V</option><option value="custom">Custom</option></select></label>
+<label id="voltageField" hidden>Custom volts<input id="voltage" type="text" inputmode="decimal"></label>
+</div>
+<p id="rateHint" class="help">Currency changes the symbol, not the exchange rate.</p>
+</section>
+<section class="card" aria-labelledby="backupTitle"><h2 id="backupTitle">Backup</h2>
+<p class="help">One JSON file with the lab, builds, your parts, and these settings. It stays on this device unless you move the file yourself.</p>
+<div class="pro-actions"><button id="backup" type="button">Download backup</button><label class="secondary" style="display:inline-block;padding:10px 15px;border-radius:7px;cursor:pointer">Restore a file<input id="restore" type="file" accept="application/json,.json" class="sr-only"></label><button id="clearData" type="button" class="quiet">Erase everything on this device</button></div>
+<p id="backupStatus" class="help" role="status"></p>
+</section>
+<section class="card" aria-labelledby="aboutTitle"><h2 id="aboutTitle">About</h2>
+<p>Version <span id="aboutVersion">1.1.0</span></p>
+<p><a href="privacy.html">Privacy policy</a></p>
+<p><a href="https://github.com/heemsec/homelab-power">Source on GitHub</a></p>
+</section>
+</main>
+</body>
+</html>

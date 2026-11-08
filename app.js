@@ -30,9 +30,11 @@ let state,loadMessage='',stateOrigin='demo';
 try { if(location.hash.startsWith('#s=')){state=decode(location.hash);stateOrigin='share';} }catch {loadMessage='That share link didn\'t load. Opened your saved lab instead.';}
 if(!state){try{const saved=localStorage.getItem(STORE);if(saved){state=normalize(JSON.parse(saved));stateOrigin='saved';}}catch{loadMessage=loadMessage||'Couldn\'t read the saved lab, so the demo is loaded.';}}
 if(!state)state=defaults();
+applySettingsDefaults();
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const money=v=>new Intl.NumberFormat(undefined,{style:'currency',currency:state.currency,maximumFractionDigits:2}).format(v);
-const number=(v,digits=2)=>new Intl.NumberFormat(undefined,{maximumFractionDigits:digits}).format(v);
+function numLocale(){try{const s=JSON.parse(localStorage.getItem('homelab-power-settings-v1')||'null');if(s?.numberFormat==='us')return 'en-US';if(s?.numberFormat==='eu')return 'de-DE';}catch{}return undefined;}
+const money=v=>new Intl.NumberFormat(numLocale(),{style:'currency',currency:state.currency,maximumFractionDigits:2}).format(v);
+const number=(v,digits=2)=>new Intl.NumberFormat(numLocale(),{maximumFractionDigits:digits}).format(v);
 let toastTimer;
 function toast(text){$('toast').textContent=text;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',4500);}
 const SAVE_PAUSE=400;
@@ -40,7 +42,7 @@ let saveTimer=0;
 function writeState(){
  saveTimer=0;
  let local=true;try{localStorage.setItem(STORE,JSON.stringify(state));}catch{local=false;}
- $('saveStatus').textContent=local?'Saved in this browser':'Couldn\'t save here. Copy a share link so you don\'t lose it.';
+ $('saveStatus').textContent=local?'Saved on this device.':'Couldn\'t save on this device. Copy a share link so you don\'t lose it.';
 }
 // Typing updates memory and the share hash immediately. localStorage waits until typing pauses. Closing, hiding, or leaving the tab flushes that same write.
 function flushState(){if(!saveTimer)return;clearTimeout(saveTimer);writeState();}
@@ -51,6 +53,16 @@ function persist(){
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushState();});
 window.addEventListener('pagehide',flushState);
+function applySettingsDefaults(){
+ if(stateOrigin!=='demo')return;
+ let s;try{s=JSON.parse(localStorage.getItem('homelab-power-settings-v1')||'null');}catch{return;}
+ if(!s||s.version!==1)return;
+ if(['USD','EUR','GBP','CAD','AUD','JPY','INR'].includes(s.currency))state.currency=s.currency;
+ if(Number.isFinite(+s.rate))state.rate=num(+s.rate,0,1000,state.rate);
+ if(s.voltageMode==='230'){state.voltageMode='230';state.voltage=230;state.breaker=16;}
+ else if(s.voltageMode==='custom'){state.voltageMode='custom';state.voltage=num(s.voltage,50,480,120);}
+ else if(s.voltageMode==='120'){state.voltageMode='120';state.voltage=120;state.breaker=15;}
+}
 function renderInputs(){
  for(const key of ['currency','rate','offRate','peakRate','peakStart','peakEnd','offStart','offEnd','consolidateWatts','replacementWatts','price'])$(key).value=state[key];
  $('tou').checked=state.tou;renderRegion();toggleRates();renderDevices();renderResults();

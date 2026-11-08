@@ -1,0 +1,366 @@
+[
+  {
+    "id": "nicks-8u-minilab",
+    "name": "Nick's 8U 10\" minilab",
+    "description": "Nick's own build: one Lenovo M720q in a RackMate T1 with a small switch, patch panel, 10\" screen and a USB fan.",
+    "items": [
+      {
+        "partId": "deskpi-geeekpi-rackmate-t1-8u",
+        "qty": 1
+      },
+      {
+        "partId": "lenovo-thinkcentre-m720q-tiny",
+        "qty": 1
+      },
+      {
+        "partId": "deskpi-geeekpi-12-port-cat6-patch-panel-10-0-5u",
+        "qty": 1
+      },
+      {
+        "partId": "generic-10-1-hdmi-ips-monitor-1280x800-12-v",
+        "qty": 1
+      },
+      {
+        "partId": "tp-link-tl-sg108-8-port-gigabit-unmanaged",
+        "qty": 1
+      },
+      {
+        "partId": "blazin3d-1u-10-power-hub-12-outlet-usb",
+        "qty": 1
+      },
+      {
+        "partId": "deskpi-geeekpi-rackmate-120mm-usb-5v-fan-3-speed-f-0025-dp",
+        "qty": 1
+      },
+      {
+        "partId": "deskpi-geeekpi-1u-10-rack-shelf",
+        "qty": 1
+      }
+    ],
+    "estIdleW": 19.1,
+    "estTypicalW": 23.6,
+    "notes": "The power hub is the Blazin3D 1U 10\" hub (12 AC + 6 USB). Its draw is an estimate of about 0.5 W. The monitor is counted as always on."
+  },
+  {
+    "id": "10in-tiny-cluster",
+    "name": "10\" Proxmox cluster: 3 tiny PCs + Pi",
+    "description": "The most-posted r/minilab layout: RackMate T1, three 1L PCs on 1U mounts, a 5-8 port switch, a Pi 5 for DNS, patch panel and PDU.",
+    "items": [
+      {
+        "partId": "deskpi-geeekpi-rackmate-t1-8u",
+        "qty": 1
+      },
+      {
+        "partId": "lenovo-thinkcentre-m920q-tiny",
+        "qty": 3
+      },
+      {
+        "partId": "raspberry-pi-raspberry-pi-5-8gb",
+        "qty": 1
+      },
+      {
+        "partId": "tp-link-tl-sg105-m2-5-port-2-5g",
+        "qty": 1
+      },
+      {
+        "partId": "deskpi-geeekpi-12-port-cat6-patch-panel-10-0-5u",
+        "qty": 1
+      },
+      {
+        "partId": "tupavco-tp1713-10-1u-pdu-4x-ac",
+        "qty": 1
+      },
+      {
+        "partId": "deskpi-geeekpi-rackmate-120mm-usb-5v-fan-3-speed-f-0025-dp",
+        "qty": 1
+      }
+    ],
+    "estIdleW": 53.3,
+    "estTypicalW": 65.7,
+    "notes": ""
+  },
+  {
+    "id": "10in-pi-cluster",
+    "name": "10\" Raspberry Pi cluster",
+    "description": "RackMate T0 with four Pi 5 boards, a gigabit switch and the DC PDU Lite. Popular for k3s learning.",
+    "items": [
+      {
+        "partId": "deskpi-geeekpi-rackmate-t0-4u",
+        "qty": 1
+      },
+      {
+        "partId": "raspberry-pi-raspberry-pi-5-8gb",
+        "qty": 4
+      },
+      {
+        "partId": "netgear-gs308-v3-8-port",
+        "qty": 1
+      },
+      {
+        "partId": "deskpi-geeekpi-dc-pdu-lite-7-ch-0-5u-barrel-jacks",
+        "qty": 1
+      },
+      {
+        "partId": "deskpi-geeekpi-12-port-cat6-patch-panel-10-0-5u",
+        "qty": 1
+      }
+    ],
+    "estIdleW": 16.2,
+    "estTypicalW": 21.0,
+    "notes": "Pi figures exclude NVMe HATs; add ~1-3 W each if used."
+  },
+  {
+    "id": "low-power-starter",
+    "name": "Low-power starter (N100 + 2-bay NAS + UniFi)",
+    "description": "Shelf-sized lab for Home Assistant, Jellyfin and backups: one N100 mini PC, a 2-bay Synology, a UCG Ultra, a Flex Mini and one AP.",
+    "items": [
+      {
+        "partId": "beelink-mini-s12-pro-n100",
+        "qty": 1
+      },
+      {
+        "partId": "synology-ds224",
+        "qty": 1
+      },
+      {
+        "partId": "ubiquiti-unifi-cloud-gateway-ultra-ucg-ultra",
+        "qty": 1
+      },
+      {
+        "partId": "ubiquiti-usw-flex-mini-5-port",
+        "qty": 1
+      },
+      {
+        "partId": "ubiquiti-u6-lite",
+        "qty": 1
+      },
+      {
+        "partId": "apc-back-ups-pro-bx1500m",
+        "qty": 1
+      }
+    ],
+    "estIdleW": 26.9,
+    "estTypicalW": 42.4,
+    "notes": "DS224+ figure includes its two drives."
+  },
+  {
+    "id": "classic-r730-synology-unifi",
+    "name": "Classic rack: Dell R730 + Synology + UniFi",
+    "description": "The archetypal r/homelab 'first real rack': R730 for VMs, a DS920+ for storage, UDM Pro, USW Pro 24 PoE, two U6 Pros and a CyberPower UPS in a 25U open frame.",
+    "items": [
+      {
+        "partId": "startech-4-post-25u-open-frame-rack-19",
+        "qty": 1
+      },
+      {
+        "partId": "dell-poweredge-r730",
+        "qty": 1
+      },
+      {
+        "partId": "synology-ds920",
+        "qty": 1
+      },
+      {
+        "partId": "ubiquiti-unifi-dream-machine-pro-udm-pro",
+        "qty": 1
+      },
+      {
+        "partId": "ubiquiti-usw-pro-24-poe",
+        "qty": 1
+      },
+      {
+        "partId": "ubiquiti-u6-pro",
+        "qty": 2
+      },
+      {
+        "partId": "cyberpower-cp1500pfclcd",
+        "qty": 1
+      },
+      {
+        "partId": "generic-24-port-cat6-patch-panel-19-1u",
+        "qty": 1
+      },
+      {
+        "partId": "generic-19-1u-power-strip-8-outlet-passive",
+        "qty": 1
+      }
+    ],
+    "estIdleW": 156.7,
+    "estTypicalW": 211.2,
+    "notes": "DS920+ uses its 'access' figure with 4 drives. APs are PoE-powered from the switch, so their draw is listed separately (add ~10% PoE loss if you want to be strict)."
+  },
+  {
+    "id": "tiny-19in-cluster",
+    "name": "19\" rack with an OptiPlex Micro cluster",
+    "description": "Three OptiPlex 7070 Micros on a 19\" shelf, a 16-port UniFi switch, a CRS305 for 10G, a DS923+ and a rack UPS.",
+    "items": [
+      {
+        "partId": "generic-19-12u-wall-mount-rack",
+        "qty": 1
+      },
+      {
+        "partId": "dell-optiplex-7070-micro",
+        "qty": 3
+      },
+      {
+        "partId": "ubiquiti-usw-pro-max-16-poe",
+        "qty": 1
+      },
+      {
+        "partId": "mikrotik-crs305-1g-4s-in-4x-sfp",
+        "qty": 1
+      },
+      {
+        "partId": "synology-ds923",
+        "qty": 1
+      },
+      {
+        "partId": "cyberpower-or1500lcdrm1u-1u-rack",
+        "qty": 1
+      },
+      {
+        "partId": "generic-19-1u-cantilever-shelf",
+        "qty": 1
+      },
+      {
+        "partId": "generic-24-port-cat6-patch-panel-19-1u",
+        "qty": 1
+      }
+    ],
+    "estIdleW": 72.1,
+    "estTypicalW": 105.7,
+    "notes": ""
+  },
+  {
+    "id": "diy-truenas-opnsense",
+    "name": "DIY TrueNAS + OPNsense box",
+    "description": "A custom-built NAS (half of self-hosters build their own) with an OPNsense firewall on a Protectli, a smart switch and a Pi-hole.",
+    "items": [
+      {
+        "partId": "diy-truenas-unraid-box-i3-4x-3-5-hdd",
+        "qty": 1
+      },
+      {
+        "partId": "protectli-vault-vp2420-j6412",
+        "qty": 1
+      },
+      {
+        "partId": "tp-link-tl-sg108e-8-port-easy-smart",
+        "qty": 1
+      },
+      {
+        "partId": "raspberry-pi-raspberry-pi-4-model-b",
+        "qty": 1
+      },
+      {
+        "partId": "apc-back-ups-pro-br1500ms2",
+        "qty": 1
+      },
+      {
+        "partId": "ubiquiti-u6-lite",
+        "qty": 1
+      }
+    ],
+    "estIdleW": 50.0,
+    "estTypicalW": 60.4,
+    "notes": "DIY NAS figure includes four 3.5\" HDDs."
+  },
+  {
+    "id": "ms01-10g-lab",
+    "name": "MS-01 10G lab",
+    "description": "Three Minisforum MS-01s over SFP+ with a UDM SE, a USW Aggregation and a UNAS-style storage box.",
+    "items": [
+      {
+        "partId": "minisforum-ms-01-i9-13900h",
+        "qty": 3
+      },
+      {
+        "partId": "ubiquiti-usw-aggregation-8x-sfp",
+        "qty": 1
+      },
+      {
+        "partId": "ubiquiti-unifi-dream-machine-se-udm-se",
+        "qty": 1
+      },
+      {
+        "partId": "ugreen-nasync-dxp4800-plus",
+        "qty": 1
+      },
+      {
+        "partId": "cyberpower-cp1500pfclcd",
+        "qty": 1
+      }
+    ],
+    "estIdleW": 101.5,
+    "estTypicalW": 146.5,
+    "notes": "Add ~10-15 W per MS-01 if you install ConnectX cards."
+  },
+  {
+    "id": "enterprise-storage-heavy",
+    "name": "Enterprise storage stack",
+    "description": "R720xd with 12 drives, a DL380 Gen9 for compute, a Cisco 2960-X and a 2U Smart-UPS. Common in older r/homelab posts and the usual 'my power bill' thread.",
+    "items": [
+      {
+        "partId": "startech-4-post-25u-open-frame-rack-19",
+        "qty": 1
+      },
+      {
+        "partId": "dell-poweredge-r720xd",
+        "qty": 1
+      },
+      {
+        "partId": "seagate-exos-x18-18tb",
+        "qty": 12
+      },
+      {
+        "partId": "hpe-proliant-dl380-gen9",
+        "qty": 1
+      },
+      {
+        "partId": "cisco-catalyst-2960-x-48-port",
+        "qty": 1
+      },
+      {
+        "partId": "apc-smart-ups-smt1500rm2u-2u-rack",
+        "qty": 1
+      },
+      {
+        "partId": "generic-24-port-cat6-patch-panel-19-1u",
+        "qty": 1
+      }
+    ],
+    "estIdleW": 366.1,
+    "estTypicalW": 498.9,
+    "notes": "R720xd figure already includes a few drives' worth of backplane draw; adding 12 drives on top makes this a deliberately conservative total."
+  },
+  {
+    "id": "plex-media-server",
+    "name": "Plex/Jellyfin media box",
+    "description": "DIY low-power NAS with an Arc A310 for transcoding, a 2.5G switch and a Coral for Frigate.",
+    "items": [
+      {
+        "partId": "diy-low-power-nas-n100-i3-drives-spun-down",
+        "qty": 1
+      },
+      {
+        "partId": "intel-arc-a310-low-profile",
+        "qty": 1
+      },
+      {
+        "partId": "tp-link-tl-sg105-m2-5-port-2-5g",
+        "qty": 1
+      },
+      {
+        "partId": "google-coral-usb-accelerator-edge-tpu",
+        "qty": 1
+      },
+      {
+        "partId": "eaton-3s-550-small-standby",
+        "qty": 1
+      }
+    ],
+    "estIdleW": 23.2,
+    "estTypicalW": 33.7,
+    "notes": ""
+  }
+]

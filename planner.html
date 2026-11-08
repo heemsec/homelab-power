@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Plan a homelab rack, see idle and typical watts, then send the build to the cost calculator.">
+<meta name="theme-color" content="#0b1215"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Homelab Power"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<script src="theme.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="ui.css"><script src="entitlement.js"></script><script defer src="pwa.js"></script><script defer src="planner.js"></script>
+<title>Build planner · Homelab Power</title>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="index.html" aria-label="Homelab Power, calculator"><span class="logo">ϟ</span> HOMELAB <b>POWER</b></a><span class="privacy"><span class="dot"></span> On this device. No tracking.</span></header>
+<nav class="sitenav" aria-label="Sections"><a href="index.html">Calculator</a><a href="planner.html" aria-current="page">Planner</a><a href="settings.html">Settings</a></nav>
+<main class="page-intro">
+<p class="eyebrow">BUILD PLANNER</p>
+<h1>Sketch the rack. Then look at the watts.</h1>
+<p class="help" id="poeNote">These are typical numbers, and your own wall meter beats them. Switch figures leave out PoE. PoE devices are listed on their own, so don't count that load twice.</p>
+</main>
+<main>
+<section class="card" aria-labelledby="rackTitle"><div class="section-heading"><div><p class="step">THE RACK</p><h2 id="rackTitle">How big is it?</h2></div></div>
+<div class="settings-grid">
+<div class="choice-stack" role="radiogroup" aria-label="Rack width"><span>Width</span><label class="toggle"><input type="radio" name="rackWidth" id="rackWidth10" value="10" checked> 10 inch</label><label class="toggle"><input type="radio" name="rackWidth" id="rackWidth19" value="19"> 19 inch</label></div>
+<label>Height<select id="rackHeight"><option value="6">6U</option><option value="8">8U</option><option value="9">9U</option><option value="12">12U</option><option value="18">18U</option><option value="24">24U</option><option value="42">42U</option><option value="custom">Custom height</option></select></label>
+<label id="rackHeightCustomField" hidden>Custom height in U<input id="rackHeightCustom" type="text" inputmode="decimal" value="8" aria-describedby="heightHint"></label>
+</div>
+<p id="heightHint" class="help">10 inch racks can take half-U parts. 19 inch racks step in whole U.</p>
+</section>
+<section class="card" aria-labelledby="presetTitle"><div class="section-heading"><div><p class="step">STARTERS</p><h2 id="presetTitle">Or start from a build people actually post</h2></div></div>
+<label>Preset<select id="presetSelect"></select></label>
+<p id="presetBlurb" class="help"></p>
+<button id="loadPreset" type="button">Load this build</button>
+</section>
+<div class="totals-bar" aria-live="polite">
+<div><p>Idle</p><strong id="idleTotal">0 W</strong></div>
+<div><p>Typical</p><strong id="typicalTotal">0 W</strong></div>
+<button id="sendCalc" type="button">Send to calculator</button>
+</div>
+<p id="fitWarning" class="circuit-warning" role="status" hidden></p>
+<div class="planner-layout">
+<section class="card" aria-labelledby="layoutTitle"><h2 id="layoutTitle">Layout</h2><p id="frameNote" class="help"></p><div id="rackVisual" class="rack-scroll" tabindex="0" role="region" aria-label="Rack layout"></div><h3>Parts in this build</h3><div id="itemList"></div></section>
+<section class="card" aria-labelledby="catalogTitle"><h2 id="catalogTitle">Parts</h2>
+<label>Search<input id="partSearch" type="search" placeholder="M720q, patch panel, UniFi…"></label>
+<label>Category<select id="partCategory"><option value="all">Everything</option></select></label>
+<div id="catalog" class="catalog" aria-live="polite"></div>
+<button id="catalogMore" type="button" class="secondary" hidden>Show more</button>
+</section>
+</div>
+<section class="card" aria-labelledby="savedTitle"><div class="section-heading"><div><p class="step">SAVED BUILDS</p><h2 id="savedTitle">One build is free</h2></div><button id="newBuild" type="button" class="secondary">New build</button></div>
+<label>Open build<select id="buildSelect"></select></label>
+<label>Name<input id="buildName" type="text" maxlength="60"></label>
+<p id="buildNote" class="help"></p>
+</section>
+<section class="card" aria-labelledby="proTitle"><div class="section-heading"><div><p class="step">PRO</p><h2 id="proTitle">A few extras</h2></div><label class="toggle"><input id="previewPro" type="checkbox"> Preview Pro</label></div>
+<p id="proUpsell" class="upsell">More than one saved build, your own parts, a side-by-side compare, and a PNG or CSV of the rack are Pro. On Android that's the Play Billing unlock. Here, Preview Pro lets you try them. The build you already have stays either way.</p>
+<div id="proTools">
+<h3>Compare two builds</h3>
+<div class="settings-grid"><label>First<select id="compareA"></select></label><label>Second<select id="compareB"></select></label></div>
+<div id="comparison" class="compare-grid"></div>
+<div class="pro-actions"><button id="exportPng" type="button" class="secondary">Download rack image</button><button id="exportCsv" type="button" class="secondary">Download CSV</button></div>
+<h3>Your own parts</h3>
+<form id="customPartForm"><div class="settings-grid"><label>Name<input id="customName" type="text" maxlength="80" required></label><label>Idle watts<input id="customIdle" type="text" inputmode="decimal" value="0"></label><label>Typical watts<input id="customTypical" type="text" inputmode="decimal" value="0"></label><label>Rack units<input id="customU" type="text" inputmode="decimal" value="1"></label><label>Fits<select id="customWhere"><option value="10">10 inch rack</option><option value="19">19 inch rack</option><option value="shelf">Shelf / outside</option></select></label></div><button type="submit">Add this part</button></form>
+</div>
+</section>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
