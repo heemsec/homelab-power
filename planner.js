@@ -36,8 +36,9 @@ function toast(text) {
   el.textContent = text;
   el.style.display = 'block';
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => { el.style.display = 'none'; }, 4200);
+  toast._t = setTimeout(() => { el.style.display = 'none'; }, 3000);
 }
+document.getElementById('toast').addEventListener('click', () => { clearTimeout(toast._t); $('toast').style.display = 'none'; });
 
 let parts = [], presets = [], custom = [], corrections = {version: 1, parts: {}}, book, saveTimer = 0, catalogLimit = 40, editingId = null;
 

@@ -37,7 +37,8 @@ function numLocale(){try{const s=JSON.parse(localStorage.getItem('homelab-power-
 const money=v=>new Intl.NumberFormat(numLocale(),{style:'currency',currency:state.currency,maximumFractionDigits:2}).format(v);
 const number=(v,digits=2)=>new Intl.NumberFormat(numLocale(),{maximumFractionDigits:digits}).format(v);
 let toastTimer;
-function toast(text){$('toast').textContent=text;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',4500);}
+function toast(text){const el=$('toast');el.textContent=text;el.style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.style.display='none';},3000);}
+$('toast').addEventListener('click',()=>{clearTimeout(toastTimer);$('toast').style.display='none';});
 const SAVE_PAUSE=400;
 let saveTimer=0;
 function writeState(){

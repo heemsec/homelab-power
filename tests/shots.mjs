@@ -17,6 +17,7 @@ const phone = await phoneContext.newPage();
 const desk = await deskContext.newPage();
 
 async function shot(page, name) {
+  await page.evaluate(() => { const t = document.getElementById('toast'); if (t) t.style.display = 'none'; });
   await page.screenshot({ path: `${out}/${name}.png` });
   console.log(name);
 }
