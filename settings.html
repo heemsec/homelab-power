@@ -19,11 +19,21 @@
 <label>Currency<select id="currency"><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option><option value="GBP">GBP (£)</option><option value="CAD">CAD ($)</option><option value="AUD">AUD ($)</option><option value="JPY">JPY (¥)</option><option value="INR">INR (₹)</option></select></label>
 <label>Default rate per kWh<input id="rate" type="text" inputmode="decimal" aria-describedby="rateHint"></label>
 <label>Number format<select id="numberFormat"><option value="auto">However this device does it</option><option value="us">1,234.56</option><option value="eu">1.234,56</option></select></label>
-<div class="choice-stack" role="radiogroup" aria-label="Theme"><span>Theme</span><label class="toggle"><input type="radio" name="theme" value="system"> Match the device</label><label class="toggle"><input type="radio" name="theme" value="light"> Light</label><label class="toggle"><input type="radio" name="theme" value="dark"> Dark</label></div>
+<div class="choice-stack" role="radiogroup" aria-label="Light or dark"><span>Light or dark</span><label class="toggle"><input type="radio" name="theme" value="system"> Match the device</label><label class="toggle"><input type="radio" name="theme" value="light"> Light</label><label class="toggle"><input type="radio" name="theme" value="dark"> Dark</label></div>
 <label>Default mains<select id="voltageMode"><option value="120">120 V</option><option value="230">230 V</option><option value="custom">Custom</option></select></label>
 <label id="voltageField" hidden>Custom volts<input id="voltage" type="text" inputmode="decimal"></label>
 </div>
 <p id="rateHint" class="help">Currency changes the symbol, not the exchange rate.</p>
+</section>
+<section class="card" aria-labelledby="paletteTitle"><h2 id="paletteTitle">Color theme</h2>
+<p class="help">Each one has a dark page and a light page. Homelab Green and Cyber-Grid are free. The other two stay picked if Pro is turned off, and the page falls back to Homelab Green until it's on again.</p>
+<div class="swatch-grid" role="radiogroup" aria-label="Color theme">
+<label class="swatch"><input type="radio" name="palette" value="homelab"><span class="swatch-pair" aria-hidden="true"><span class="mini" style="--m-bg:#0b1215;--m-card:#121e22;--m-ink:#eff7f6;--m-accent:#b4ef86"></span><span class="mini" style="--m-bg:#f3f6f5;--m-card:#fff;--m-ink:#172b2a;--m-accent:#326319"></span></span><span class="swatch-name">Homelab Green</span><span class="swatch-note">Free. The one this started with.</span></label>
+<label class="swatch"><input type="radio" name="palette" value="cyber"><span class="swatch-pair" aria-hidden="true"><span class="mini" style="--m-bg:#0B0F19;--m-card:#1F2937;--m-ink:#E5E7EB;--m-accent:#34D399"></span><span class="mini" style="--m-bg:#F3F6FB;--m-card:#fff;--m-ink:#111827;--m-accent:#047857"></span></span><span class="swatch-name">Cyber-Grid</span><span class="swatch-note">Free. Night screen with a green spark.</span></label>
+<label class="swatch"><input type="radio" name="palette" value="nordic" data-pro="true"><span class="swatch-pair" aria-hidden="true"><span class="mini" style="--m-bg:#0F172A;--m-card:#1E293B;--m-ink:#E2E8F0;--m-accent:#22D3EE"></span><span class="mini" style="--m-bg:#F8FAFC;--m-card:#fff;--m-ink:#0F172A;--m-accent:#0E7490"></span></span><span class="swatch-name">Nordic Server <span class="swatch-lock">Locked</span></span><span class="swatch-note">Pro. Slate and a cold cyan.</span></label>
+<label class="swatch"><input type="radio" name="palette" value="amber" data-pro="true"><span class="swatch-pair" aria-hidden="true"><span class="mini" style="--m-bg:#121212;--m-card:#282828;--m-ink:#F5F5F5;--m-accent:#F59E0B"></span><span class="mini" style="--m-bg:#FAFAF9;--m-card:#fff;--m-ink:#1C1917;--m-accent:#D97706"></span></span><span class="swatch-name">Amber Terminal <span class="swatch-lock">Locked</span></span><span class="swatch-note">Pro. Warm screen, orange actions.</span></label>
+</div>
+<p id="paletteUpsell" class="upsell" hidden>Nordic Server and Amber Terminal are Pro themes. Preview Pro on the planner or the calculator, or unlock them in the Android app, and the one you already picked comes back. Until then the page stays on Homelab Green, and the pick is not forgotten.</p>
 </section>
 <section class="card" aria-labelledby="backupTitle"><h2 id="backupTitle">Backup</h2>
 <p class="help">One JSON file with the lab, including time-of-use periods, plus builds, part corrections, your parts, and these settings. It stays on this device unless you move the file yourself.</p>

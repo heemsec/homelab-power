@@ -6,7 +6,7 @@
   "main": "app.js",
   "scripts": {
     "test:unit": "node --test tests/unit/*.test.js",
-    "test:e2e": "node tests/phase1.mjs && node tests/phase2.mjs",
+    "test:e2e": "node tests/phase1.mjs && node tests/phase2.mjs && node tests/phase4.mjs",
     "test": "npm run test:unit && npm run test:e2e"
   },
   "repository": {
