@@ -56,7 +56,7 @@
     "rackUnits": 1,
     "rackWidth": 10,
     "idleW": 12,
-    "typicalW": 15.0,
+    "typicalW": 15,
     "maxW": 65,
     "confidence": "measured",
     "source": "https://www.servethehome.com/lenovo-thinkcentre-m710q-tiny-guide-and-ce-review/3/",
@@ -72,7 +72,7 @@
     "rackUnits": 1,
     "rackWidth": 10,
     "idleW": 12,
-    "typicalW": 15.0,
+    "typicalW": 15,
     "maxW": 65,
     "confidence": "measured",
     "source": "https://www.servethehome.com/lenovo-thinkcentre-m900-tiny-project-tinyminimicro-guide/3/",
@@ -104,7 +104,7 @@
     "rackUnits": 1,
     "rackWidth": 10,
     "idleW": 12,
-    "typicalW": 15.0,
+    "typicalW": 15,
     "maxW": 65,
     "confidence": "measured",
     "source": "https://homelabstarter.com/homelab-mini-pc-comparison/",
@@ -120,7 +120,7 @@
     "rackUnits": 1,
     "rackWidth": 10,
     "idleW": 12,
-    "typicalW": 15.0,
+    "typicalW": 15,
     "maxW": 58,
     "confidence": "measured",
     "source": "https://www.servethehome.com/lenovo-thinkcentre-m75q-gen2-tiny-review-amd-changes-the-game/4/",
@@ -216,7 +216,7 @@
     "rackUnits": 1,
     "rackWidth": 10,
     "idleW": 12,
-    "typicalW": 15.0,
+    "typicalW": 15,
     "maxW": 51,
     "confidence": "measured",
     "source": "https://www.servethehome.com/hp-elitedesk-800-g3-mini-ce-review-project-tinyminimicro/4/",
@@ -248,7 +248,7 @@
     "rackUnits": 1,
     "rackWidth": 10,
     "idleW": 12,
-    "typicalW": 15.0,
+    "typicalW": 15,
     "maxW": 61,
     "confidence": "measured",
     "source": "https://sheley.org/mini-pc-idle-power/",
@@ -488,7 +488,7 @@
     "rackUnits": 1,
     "rackWidth": 10,
     "idleW": 11.2,
-    "typicalW": 14.0,
+    "typicalW": 14,
     "maxW": 100,
     "confidence": "measured",
     "source": "https://www.igorslab.de/en/minisforum-ms-a1-mini-pc-im-test/6/",
@@ -568,7 +568,7 @@
     "rackUnits": 1,
     "rackWidth": 10,
     "idleW": 8,
-    "typicalW": 10.0,
+    "typicalW": 10,
     "maxW": 26,
     "confidence": "measured",
     "source": "https://bishalkshah.com.np/blog/low-power-homelab-n100-mini-pc",
@@ -584,7 +584,7 @@
     "rackUnits": 1,
     "rackWidth": 10,
     "idleW": 8,
-    "typicalW": 10.0,
+    "typicalW": 10,
     "maxW": 24.5,
     "confidence": "measured",
     "source": "https://bishalkshah.com.np/blog/low-power-homelab-n100-mini-pc",
@@ -711,7 +711,7 @@
     "formFactor": "SBC",
     "rackUnits": 1,
     "rackWidth": 10,
-    "idleW": 1.0,
+    "idleW": 1,
     "typicalW": 1.2,
     "maxW": 10,
     "confidence": "measured",
@@ -840,7 +840,7 @@
     "rackUnits": 2,
     "rackWidth": 19,
     "idleW": 100,
-    "typicalW": 125.0,
+    "typicalW": 125,
     "maxW": 350,
     "confidence": "measured",
     "source": "https://www.reddit.com/r/homelab/comments/1dnsmd1/estimation_of_r730xds_power_consumption/",
@@ -888,7 +888,7 @@
     "rackUnits": 1,
     "rackWidth": 19,
     "idleW": 140,
-    "typicalW": 175.0,
+    "typicalW": 175,
     "maxW": 500,
     "confidence": "measured",
     "source": "https://www.reddit.com/r/homelab/comments/1j8baln/r640_high_idle_consumption_for_hardware/",
@@ -920,7 +920,7 @@
     "rackUnits": 1,
     "rackWidth": 19,
     "idleW": 20,
-    "typicalW": 25.0,
+    "typicalW": 25,
     "maxW": 100,
     "confidence": "measured",
     "source": "https://www.reddit.com/r/homelab/comments/q5hxd3/power_consuption_spreadsheet/",
@@ -952,7 +952,7 @@
     "rackUnits": 1,
     "rackWidth": 19,
     "idleW": 88,
-    "typicalW": 110.0,
+    "typicalW": 110,
     "maxW": 300,
     "confidence": "measured",
     "source": "https://www.reddit.com/r/homelab/comments/1pt58s0/power_consumption_of_hp_proliant_dl360_gen9_with/",
@@ -1016,7 +1016,7 @@
     "rackUnits": 1,
     "rackWidth": 19,
     "idleW": 60,
-    "typicalW": 75.0,
+    "typicalW": 75,
     "maxW": 200,
     "confidence": "estimate",
     "source": "https://www.reddit.com/r/homelab/comments/12gxaed/supermicro_x10sraf_high_power_consumption/",
@@ -1032,7 +1032,7 @@
     "rackUnits": 2,
     "rackWidth": 19,
     "idleW": 120,
-    "typicalW": 150.0,
+    "typicalW": 150,
     "maxW": 400,
     "confidence": "estimate",
     "source": "https://www.reddit.com/r/homelab/comments/1cye4xb/lots_of_power_and_heat/",
@@ -1096,7 +1096,7 @@
     "formFactor": "desktop 2-bay",
     "rackUnits": null,
     "rackWidth": "none",
-    "idleW": 7.0,
+    "idleW": 7,
     "typicalW": 18.6,
     "maxW": null,
     "confidence": "measured",
@@ -1386,7 +1386,7 @@
     "rackUnits": null,
     "rackWidth": "none",
     "idleW": 14.4,
-    "typicalW": 18.0,
+    "typicalW": 18,
     "maxW": 30,
     "confidence": "measured",
     "source": "https://liliputing.com/gmktec-nucbox-g9-review-this-tiny-nas-supports-four-m-2-ssds-and-dual-2-5-gbe-lan-connections/",
@@ -1514,7 +1514,7 @@
     "rackUnits": null,
     "rackWidth": "none",
     "idleW": 5.6,
-    "typicalW": 6.0,
+    "typicalW": 6,
     "maxW": null,
     "confidence": "spec",
     "source": "https://cdn-reichelt.de/documents/datenblatt/E610/WD_0F384XX_DB-EN.pdf",
@@ -1594,7 +1594,7 @@
     "rackUnits": null,
     "rackWidth": "none",
     "idleW": 0.055,
-    "typicalW": 1.0,
+    "typicalW": 1,
     "maxW": 5.8,
     "confidence": "spec",
     "source": "https://www.techpowerup.com/review/samsung-990-pro-2-tb/7.html",
@@ -1610,7 +1610,7 @@
     "rackUnits": null,
     "rackWidth": "none",
     "idleW": 0.035,
-    "typicalW": 1.0,
+    "typicalW": 1,
     "maxW": 6.2,
     "confidence": "spec",
     "source": "https://www.anandtech.com/Show/Index/16087?all=False&cPage=3&page=8&slug=the-samsung-980-pro-pcie-4-ssd-review&sort=0",
@@ -1625,7 +1625,7 @@
     "formFactor": "M.2 SSD",
     "rackUnits": null,
     "rackWidth": "none",
-    "idleW": 1.0,
+    "idleW": 1,
     "typicalW": 1.5,
     "maxW": 4.6,
     "confidence": "measured",
@@ -1707,7 +1707,7 @@
     "rackWidth": 10,
     "idleW": 7,
     "typicalW": 7.5,
-    "maxW": 10.0,
+    "maxW": 10,
     "confidence": "estimate",
     "source": "https://static.tp-link.com/2019/201903/20190326/TL-SG105(UN)SG108SG116_Datasheet.pdf",
     "popularity": 2,
@@ -1835,7 +1835,7 @@
     "rackWidth": 10,
     "idleW": 4.9,
     "typicalW": 4.9,
-    "maxW": 6.0,
+    "maxW": 6,
     "confidence": "spec",
     "source": "https://www.tpcdb.com/list.php?type=25",
     "popularity": 2,
@@ -2591,7 +2591,34 @@
     "confidence": "spec",
     "source": "https://www.energystar.gov/productfinder/product/certified-uninterruptible-power-supplies/details/2365322/export/pdf/download",
     "popularity": 1,
-    "notes": "ENERGY STAR: 3.104 W at 0% load. This is the UPS's own draw at no load. Line-interactive units also lose ~3-5% of whatever they carry; that's included in typicalW only as noted."
+    "notes": "ENERGY STAR: 3.104 W at 0% load. This is the UPS's own draw at no load. Line-interactive units also lose ~3-5% of whatever they carry; that's included in typicalW only as noted.",
+    "ratedW": 900,
+    "batteryVAh": 257,
+    "batterySource": "https://iportal.se.com/Contents/docs/BR1500MS2_DATASHEET.PDF",
+    "runtimeSource": "https://download.se.com/files?p_Doc_Ref=SPD_JVAN-ATJJVQ_EN",
+    "runtimeCurve": [
+      {
+        "loadW": 40,
+        "minutes": 150
+      },
+      {
+        "loadW": 79,
+        "minutes": 94
+      },
+      {
+        "loadW": 119,
+        "minutes": 66
+      },
+      {
+        "loadW": 240,
+        "minutes": 32
+      },
+      {
+        "loadW": 335,
+        "minutes": 21
+      }
+    ],
+    "runtimeNote": "The minutes are the BR1500MS2 column in APC's Back-UPS Pro brochure. 257 VAh and 900 W are on the Schneider datasheet. Both describe a new, full battery."
   },
   {
     "id": "apc-back-ups-pro-bx1500m",
@@ -2607,7 +2634,10 @@
     "confidence": "spec",
     "source": "https://www.energystar.gov/productfinder/product/certified-uninterruptible-power-supplies/details/2323357/export/pdf",
     "popularity": 1,
-    "notes": "ENERGY STAR: 2.88 W at 0% load. This is the UPS's own draw at no load. Line-interactive units also lose ~3-5% of whatever they carry; that's included in typicalW only as noted."
+    "notes": "ENERGY STAR: 2.88 W at 0% load. This is the UPS's own draw at no load. Line-interactive units also lose ~3-5% of whatever they carry; that's included in typicalW only as noted.",
+    "ratedW": 900,
+    "batterySource": "https://www.apc.com/ca/en/product/download-pdf/BX1500M?filename=APC_APC-BackUPS-Pro_BX1500M.pdf",
+    "runtimeNote": "Schneider publishes 900 W. The datasheet points at a runtime graph and does not list watt-hours or minute points, so this app asks you for the battery size."
   },
   {
     "id": "cyberpower-cp1500pfclcd",
@@ -2617,13 +2647,28 @@
     "formFactor": "tower",
     "rackUnits": null,
     "rackWidth": "none",
-    "idleW": 4.0,
-    "typicalW": 4.0,
+    "idleW": 4,
+    "typicalW": 4,
     "maxW": null,
     "confidence": "spec",
     "source": "https://www.energystar.gov/productfinder/product/certified-uninterruptible-power-supplies/details/2331672/export/pdf/download",
     "popularity": 1,
-    "notes": "ENERGY STAR: 4.0 W at 0% load; owners measure 4-5 W. This is the UPS's own draw at no load. Line-interactive units also lose ~3-5% of whatever they carry; that's included in typicalW only as noted."
+    "notes": "ENERGY STAR: 4.0 W at 0% load; owners measure 4-5 W. This is the UPS's own draw at no load. Line-interactive units also lose ~3-5% of whatever they carry; that's included in typicalW only as noted.",
+    "ratedW": 1000,
+    "batteryWh": 216,
+    "batterySource": "https://www.cyberpowersystems.com/product/ups/pfc-sinewave/cp1500pfclcd/",
+    "runtimeSource": "https://www.cyberpowersystems.com/product/ups/pfc-sinewave/cp1500pfclcd/",
+    "runtimeCurve": [
+      {
+        "loadW": 500,
+        "minutes": 10
+      },
+      {
+        "loadW": 1000,
+        "minutes": 2.5
+      }
+    ],
+    "runtimeNote": "CyberPower lists 10 minutes at half load and 2.5 minutes at full load (1000 W). The 216 Wh figure is 2 × 12 V × 9 Ah from the published battery size, not a separate watt-hour rating."
   },
   {
     "id": "cyberpower-or1500lcdrm1u-1u-rack",
@@ -2639,7 +2684,22 @@
     "confidence": "measured",
     "source": "https://www.tpcdb.com/product.php?id=7431",
     "popularity": 2,
-    "notes": "tpcdb: OR1500ELCDRM1U (EU twin) 4.95 W idle. This is the UPS's own draw at no load. Line-interactive units also lose ~3-5% of whatever they carry; that's included in typicalW only as noted."
+    "notes": "tpcdb: OR1500ELCDRM1U (EU twin) 4.95 W idle. This is the UPS's own draw at no load. Line-interactive units also lose ~3-5% of whatever they carry; that's included in typicalW only as noted.",
+    "ratedW": 900,
+    "batteryWh": 216,
+    "batterySource": "https://www.cyberpowersystems.com/product/ups/smart-app-lcd/or1500lcdrm1u/",
+    "runtimeSource": "https://www.cyberpowersystems.com/product/ups/smart-app-lcd/or1500lcdrm1u/",
+    "runtimeCurve": [
+      {
+        "loadW": 450,
+        "minutes": 11
+      },
+      {
+        "loadW": 900,
+        "minutes": 2
+      }
+    ],
+    "runtimeNote": "CyberPower lists 11 minutes at half load and 2 minutes at full load (900 W). The 216 Wh figure is 4 × 6 V × 9 Ah from the published battery size."
   },
   {
     "id": "eaton-3s-550-small-standby",
@@ -2655,7 +2715,8 @@
     "confidence": "spec",
     "source": "https://www.eevblog.com/forum/renewable-energy/ups-standby-power-consumption/",
     "popularity": 2,
-    "notes": "~3.7 W at no load, ENERGY STAR qualified. Eaton markets its small standby UPSes for 10\" minilab racks. This is the UPS's own draw at no load. Line-interactive units also lose ~3-5% of whatever they carry; that's included in typicalW only as noted."
+    "notes": "~3.7 W at no load, ENERGY STAR qualified. Eaton markets its small standby UPSes for 10\" minilab racks. This is the UPS's own draw at no load. Line-interactive units also lose ~3-5% of whatever they carry; that's included in typicalW only as noted.",
+    "runtimeNote": "No manufacturer runtime table or watt-hour figure is stored for this Eaton model. Type the battery watt-hours if you have them from the label or the manual."
   },
   {
     "id": "apc-smart-ups-smt1500rm2u-2u-rack",
@@ -2671,7 +2732,11 @@
     "confidence": "estimate",
     "source": "https://www.apc.com/us/en/faqs/FA156173/",
     "popularity": 2,
-    "notes": "No published no-load figure found. Estimated at ~15 W: Smart-UPS line-interactive units with LCD and network management run hotter than consumer Back-UPS. Measure yours. This is the UPS's own draw at no load. Line-interactive units also lose ~3-5% of whatever they carry; that's included in typicalW only as noted."
+    "notes": "No published no-load figure found. Estimated at ~15 W: Smart-UPS line-interactive units with LCD and network management run hotter than consumer Back-UPS. Measure yours. This is the UPS's own draw at no load. Line-interactive units also lose ~3-5% of whatever they carry; that's included in typicalW only as noted.",
+    "ratedW": 1000,
+    "batteryVAh": 432,
+    "batterySource": "https://www.mouser.com/datasheet/2/357/1/SMT1500RM2U_document-3053504.pdf",
+    "runtimeNote": "APC's datasheet lists 1000 W and 432 VAh. It points at a runtime graph without printing the minute points, so the estimate uses that published energy rather than a made-up curve."
   },
   {
     "id": "apc-ap7900b-switched-rack-pdu-1u",
@@ -3130,7 +3195,7 @@
     "rackUnits": 1,
     "rackWidth": 10,
     "idleW": 2.65,
-    "typicalW": 3.0,
+    "typicalW": 3,
     "maxW": 12,
     "confidence": "spec",
     "source": "https://docs.pikvm.org/v4/v4mini_datasheet.pdf",
@@ -3241,7 +3306,7 @@
     "formFactor": "mounts to rack top/side",
     "rackUnits": 0,
     "rackWidth": 10,
-    "idleW": 1.0,
+    "idleW": 1,
     "typicalW": 1.5,
     "maxW": 2.5,
     "confidence": "estimate",

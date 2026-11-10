@@ -52,6 +52,9 @@ function partById(id) {
 }
 function allParts() { return parts.concat(custom).map(p => partById(p.id)); }
 function active() { return book.builds.find(b => b.id === book.activeId) || book.builds[0]; }
+let shared = null;
+function shown() { return shared || active(); }
+function previewToast() { toast('This is a preview. Save a copy if you want to change it.'); }
 
 function emptyBuild(name = 'My build') {
   return {id: uid(), name, width: 10, heightU: 8, items: []};
@@ -211,6 +214,7 @@ function shortLabel(part, item) {
 }
 
 function readControls(build) {
+  if (shared) return;
   build.width = $('rackWidth19').checked ? 19 : 10;
   const h = $('rackHeight').value;
   if (h === 'custom') build.heightU = num($('rackHeightCustom').value, 1, 52, build.heightU || 8);
@@ -258,6 +262,10 @@ function renderTotals(build) {
   if (wide.length) bits.push('A 19 inch part won\'t sit in a 10 inch rack. It\'s listed with the shelf gear.');
   $('fitWarning').hidden = !bits.length;
   $('fitWarning').textContent = bits.join(' ');
+  $('idleHeat').textContent = `${fmt(M.btuPerHour(t.idle), 1)} BTU/hr`;
+  $('typicalHeat').textContent = `${fmt(M.btuPerHour(t.typical), 1)} BTU/hr`;
+  $('idleHeat').dataset.btu = String(M.btuPerHour(t.idle));
+  $('typicalHeat').dataset.btu = String(M.btuPerHour(t.typical));
 }
 
 function itemButtons(it) {
@@ -380,18 +388,171 @@ function renderPro() {
   $('proTools').hidden = !on;
   if (on) renderCompare();
 }
+function minutesPhrase(hit) {
+  if (!hit) return 'no published point';
+  if (hit.bound === 'longer') return `longer than ${fmt(hit.minutes, 1)} minutes on a new battery`;
+  if (hit.bound === 'shorter') return `shorter than ${fmt(hit.minutes, 1)} minutes on a new battery`;
+  return `${fmt(hit.minutes * 0.6, 1)} to ${fmt(hit.minutes, 1)} minutes`;
+}
+function runtimeSentence(part, item, load, label) {
+  const rated = Number(part.ratedW);
+  const over = Number.isFinite(rated) && rated > 0 && load > rated + 1e-6;
+  const name = label === 'idle' ? 'Idle' : 'Typical';
+  if (over) return `<p class="circuit-warning"><strong>Over the rating.</strong> ${name} load elsewhere is ${wattsText(load)}, and this UPS is rated ${wattsText(rated)}.</p>`;
+  if (Array.isArray(part.runtimeCurve) && part.runtimeCurve.length) {
+    const hit = M.interpolateRuntime(part.runtimeCurve, load);
+    return `<p>${name}: ${minutesPhrase(hit)} at ${wattsText(load)} on the other gear. The top of the range is the published curve. The low end is 60% of that, for an older battery.</p>`;
+  }
+  const wh = item.batteryWh || part.batteryWh || part.batteryVAh;
+  if (wh && load > 0) {
+    const est = M.runtimeFromEnergy(wh, load);
+    const energy = part.batteryVAh && !part.batteryWh && !item.batteryWh ? `${fmt(part.batteryVAh, 0)} VAh from the datasheet, used here as energy` : `${fmt(wh, 1)} Wh`;
+    return `<p>${name}: about ${fmt(est.low, 0)} to ${fmt(est.high, 0)} minutes, with ${fmt(est.mid, 0)} in the middle, at ${wattsText(load)}. That uses ${energy}, 85% efficiency, and 80% of the pack. The edges of the range are 80% / 70% and 90% / 90%.</p>`;
+  }
+  if (!(load > 0)) return `<p>${name}: nothing else in the build is drawing power, so runtime isn't the limiting question.</p>`;
+  return `<p>${name} load elsewhere is ${wattsText(load)}. No published battery size is stored for this model.</p>`;
+}
+function renderUps(build) {
+  const ups = (build.items || []).filter(it => partById(it.partId)?.category === 'ups');
+  $('upsCard').hidden = ups.length === 0;
+  if (!ups.length) { $('upsRuntime').innerHTML = ''; return; }
+  $('upsRuntime').innerHTML = ups.map(it => {
+    const p = partById(it.partId) || {};
+    const idle = build.items.reduce((sum, other) => other.uid === it.uid ? sum : sum + oneWatts(other).idle * (other.qty || 1), 0);
+    const typical = build.items.reduce((sum, other) => other.uid === it.uid ? sum : sum + oneWatts(other).typical * (other.qty || 1), 0);
+    const ask = !p.runtimeCurve && !p.batteryWh && !p.batteryVAh;
+    const input = ask ? `<label>Battery watt-hours for ${esc(labelOf(p, it))}<input data-battery="${esc(it.uid)}" type="text" inputmode="decimal" value="${it.batteryWh ?? ''}" aria-describedby="upsTitle"></label>` : '';
+    const source = [p.runtimeSource, p.batterySource].filter((url, i, all) => url && all.indexOf(url) === i).map(url => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Source</a>`).join(' ');
+    return `<article class="comparison-card"><h3>${esc(labelOf(p, it))}</h3>${runtimeSentence(p, it, idle, 'idle')}${runtimeSentence(p, it, typical, 'typical')}<p class="help">${esc(p.runtimeNote || '')} ${source}</p>${input}</article>`;
+  }).join('') + (ups.length > 1 ? '<p class="help">Each UPS is checked against everything else in the build, as if it were carrying the whole load.</p>' : '');
+}
+function catalogChoice(category, skipId, score) {
+  return allParts().filter(p => p.category === category && p.id !== skipId && Number.isFinite(+p.typicalW)).sort((a, b) => score(a) - score(b))[0] || null;
+}
+function renderWhatIf(build) {
+  const unlocked = pro() && !shared;
+  $('whatIfLock').hidden = unlocked;
+  const {rate, currency, source} = currentRate();
+  const rows = (build.items || []).map(it => {
+    const p = partById(it.partId);
+    const w = oneWatts(it).typical * (it.qty || 1);
+    return {it, p, watts: w, year: M.energyCost(w, rate).year};
+  }).filter(row => row.p).sort((a, b) => b.year - a.year);
+  const ideas = [];
+  for (const row of rows) {
+    if (row.p.category === 'rack-server' && row.watts >= 80) {
+      const mini = catalogChoice('mini-pc', row.p.id, p => p.typicalW);
+      if (mini && mini.typicalW < row.watts) ideas.push({key: `server:${row.it.uid}`, title: `Move ${labelOf(row.p)} onto a tiny PC`, note: 'Only if that job actually fits on a tiny PC. This is the watt gap, not a promise about the processor.', from: row.watts, to: mini.typicalW, apply: copy => { const hit = copy.items.find(it => it.uid === row.it.uid); if (hit) { hit.partId = mini.id; hit.qty = 1; hit.idleOverride = null; hit.typicalOverride = null; } }});
+    }
+    if (row.p.category === 'switch' && row.watts >= 20) {
+      const modern = catalogChoice('switch', row.p.id, p => p.typicalW);
+      if (modern && modern.typicalW < row.watts) ideas.push({key: `switch:${row.it.uid}`, title: `Try ${labelOf(modern)} instead of ${labelOf(row.p)}`, note: 'Port count and PoE may not match. Check that before you buy one.', from: row.watts, to: modern.typicalW, apply: copy => { const hit = copy.items.find(it => it.uid === row.it.uid); if (hit) { hit.partId = modern.id; hit.qty = 1; hit.idleOverride = null; hit.typicalOverride = null; } }});
+    }
+    if (row.p.category === 'monitor' && row.watts >= 3) {
+      ideas.push({key: `sleep:${row.it.uid}`, title: `Count ${labelOf(row.p)} as off`, note: 'This counts the screen as off. It is not a measured sleep watt.', from: row.watts, to: 0, apply: copy => { const hit = copy.items.find(it => it.uid === row.it.uid); if (hit) { hit.idleOverride = 0; hit.typicalOverride = 0; } }});
+    }
+  }
+  const drives = rows.filter(row => row.p.category === 'drive' && row.watts >= 2);
+  if (drives.length >= 2) {
+    const ssd = catalogChoice('drive', '', p => p.typicalW < 1 ? p.typicalW : 9999);
+    if (ssd && ssd.typicalW < 1) {
+      const pair = drives.slice(0, 2);
+      const from = pair.reduce((sum, row) => sum + row.watts, 0);
+      ideas.push({key: 'drives', title: `Replace ${labelOf(pair[0].p)} and ${labelOf(pair[1].p)} with ${labelOf(ssd)}`, note: 'Only if the data fits on that one drive.', from, to: ssd.typicalW, apply: copy => { const drop = new Set(pair.map(row => row.it.uid)); copy.items = copy.items.filter(it => !drop.has(it.uid)); copy.items.push({uid: uid(), partId: ssd.id, qty: 1, placement: 'shelf', startU: null, idleOverride: null, typicalOverride: null}); }});
+    }
+  }
+  const rank = rows.slice(0, 5).map(row => `<li>${esc(labelOf(row.p))} · ${wattsText(row.watts)} · ${money(row.year, currency)} a year</li>`).join('');
+  const cards = ideas.slice(0, 6).map(idea => {
+    const save = M.yearlySavings(idea.from, idea.to, rate);
+    const priceId = `price-${idea.key.replace(/[^a-z0-9]/gi, '')}`;
+    return `<article class="comparison-card"><h3>${esc(idea.title)}</h3><p>${esc(idea.note)}</p><p><strong>${money(save.year, currency)} a year</strong> · ${money(save.month, currency)} a month · ${wattsText(idea.from - idea.to)} less</p><label>Price you would pay, optional<input id="${priceId}" data-price-for="${esc(idea.key)}" type="text" inputmode="decimal" placeholder="Leave blank to skip payback"></label><p class="help" data-payback-for="${esc(idea.key)}"></p>${unlocked ? `<button type="button" data-swap="${esc(idea.key)}">Try this in a copy</button>` : ''}</article>`;
+  }).join('');
+  $('whatIfBody').innerHTML = `<p class="help">Ranked by yearly cost at ${source}, ${money(rate, currency)} per kWh, assuming the typical draw runs all year.</p><ol>${rank || '<li>Nothing in this build yet.</li>'}</ol>${cards || '<p class="help">No conservative swap stands out. A rack server, a hot switch, extra spinning disks, or a monitor that stays on is what this looks for.</p>'}`;
+  $('whatIfBody')._ideas = ideas;
+}
+function cloneBuild(build, name) {
+  return {id: uid(), name, width: build.width, heightU: build.heightU, items: build.items.map(it => ({...it, uid: uid()}))};
+}
+function applySwap(key) {
+  if (shared) return previewToast();
+  if (!pro()) { $('whatIfLock').hidden = false; toast('Trying a swap in a second build is a Pro extra.'); return; }
+  const idea = ($('whatIfBody')._ideas || []).find(item => item.key === key);
+  if (!idea) return;
+  const source = active();
+  const copy = cloneBuild(source, `${source.name} · swap`.slice(0, 60));
+  idea.apply(copy);
+  book.builds.push(copy);
+  book.activeId = copy.id;
+  scheduleSave();
+  render();
+  $('compareA').value = source.id;
+  $('compareB').value = copy.id;
+  renderCompare();
+  toast('The swap is in a copy. The original build is still there.');
+}
+function sharePayload(build) {
+  const rate = currentRate();
+  const payload = {name: build.name, width: build.width, heightU: build.heightU, items: build.items, rate: rate.rate, currency: rate.currency};
+  try {
+    const calc = JSON.parse(localStorage.getItem(CALC_KEY) || 'null');
+    if (calc && Array.isArray(calc.periods) && calc.periods.length) payload.periods = M.cleanPeriods(calc.periods);
+  } catch {}
+  return payload;
+}
+async function buildLink(build) {
+  const hash = await window.PowerShare.encode(sharePayload(build));
+  return `${location.origin}${location.pathname}${location.search}#b=${hash}`;
+}
+async function copyBuildLink() {
+  const url = await buildLink(shown());
+  try { await navigator.clipboard.writeText(url); toast('Link copied. It has the parts list, and your rate if one is saved.'); }
+  catch { toast('Couldn\'t copy it. The link is in the address bar if you save a copy first.'); }
+  return url;
+}
+function hydrateShared(clean) {
+  return {
+    id: 'shared',
+    name: clean.name,
+    width: clean.width,
+    heightU: clean.heightU,
+    rate: clean.rate,
+    currency: clean.currency,
+    periods: M.cleanPeriods(clean.periods),
+    items: clean.items.map(it => ({uid: uid(), partId: it.partId, qty: it.qty, placement: it.placement, startU: it.startU, idleOverride: it.idleOverride, typicalOverride: it.typicalOverride, batteryWh: it.batteryWh, ownSlot: it.ownSlot === true}))
+  };
+}
+function saveSharedCopy() {
+  if (!shared) return;
+  const copy = cloneBuild(shared, `${shared.name} copy`.slice(0, 60));
+  const occupied = book.builds.some(b => b.items && b.items.length);
+  if (!pro() && occupied && !confirm('The free planner keeps one build. Replace it with this copy?')) return;
+  if (!pro()) book.builds = [copy];
+  else book.builds.push(copy);
+  book.activeId = copy.id;
+  shared = null;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch {}
+  writeBook();
+  render();
+  toast('Saved a copy on this device.');
+}
 function render() {
-  const build = active();
+  const build = shown();
+  document.body.classList.toggle('share-preview', !!shared);
+  $('shareBanner').hidden = !shared;
+  $('nativeShare').hidden = typeof navigator.share !== 'function';
   paintControls(build);
   renderTotals(build);
   renderRack(build);
   renderItems(build);
   renderCatalog();
   renderBuilds();
+  renderUps(build);
+  renderWhatIf(build);
   renderPro();
 }
 
 function addPart(id, where, startU) {
+  if (shared) return previewToast();
   const build = active();
   const part = partById(id);
   if (!part) return;
@@ -413,6 +574,7 @@ function nudge(item, dir) {
   render();
 }
 function dropData(data, hit) {
+  if (shared) return previewToast();
   if (!hit) return;
   const rack = hit.closest('#rackDrop');
   const list = hit.closest('#itemList');
@@ -439,6 +601,7 @@ function dropData(data, hit) {
 }
 
 function applyPreset(preset) {
+  if (shared) return previewToast();
   const build = active();
   if (build.items.length && !confirm(`Replace “${build.name}” with ${preset.name}?`)) return;
   const frame = preset.items.map(it => partById(it.partId)).find(p => p && p.category === 'rack');
@@ -668,12 +831,13 @@ function wire() {
   window.addEventListener('pagehide', flushSave);
   let resizeTimer = 0;
   matchMedia('(max-width: 800px)').addEventListener('change', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => renderRack(active()), 80); });
-  for (const id of ['rackWidth10', 'rackWidth19']) $(id).addEventListener('change', () => { readControls(active()); scheduleSave(); render(); });
-  $('rackHeight').addEventListener('change', () => { readControls(active()); scheduleSave(); render(); });
-  $('rackHeightCustom').addEventListener('input', () => { readControls(active()); scheduleSave(); renderTotals(active()); renderRack(active()); });
-  $('buildName').addEventListener('input', () => { active().name = $('buildName').value.slice(0, 60); scheduleSave(); });
+  for (const id of ['rackWidth10', 'rackWidth19']) $(id).addEventListener('change', () => { if (shared) return previewToast(); readControls(active()); scheduleSave(); render(); });
+  $('rackHeight').addEventListener('change', () => { if (shared) return previewToast(); readControls(active()); scheduleSave(); render(); });
+  $('rackHeightCustom').addEventListener('input', () => { if (shared) return; readControls(active()); scheduleSave(); renderTotals(shown()); renderRack(shown()); });
+  $('buildName').addEventListener('input', () => { if (shared) return; active().name = $('buildName').value.slice(0, 60); scheduleSave(); });
   $('buildSelect').addEventListener('change', () => { book.activeId = $('buildSelect').value; scheduleSave(); render(); });
   $('newBuild').addEventListener('click', () => {
+    if (shared) return previewToast();
     if (!pro() && book.builds.length >= 1) { $('proUpsell').hidden = false; toast('One saved build is free. Preview Pro if you want another.'); return; }
     const b = emptyBuild('Another build');
     book.builds.push(b); book.activeId = b.id; scheduleSave(); render();
@@ -693,7 +857,7 @@ function wire() {
   $('previewPro').addEventListener('change', () => {
     E.setPreview($('previewPro').checked);
     try { localStorage.setItem(PREVIEW, String(E.isPreview())); } catch {}
-    renderPro(); renderBuilds();
+    renderPro(); renderBuilds(); renderWhatIf(shown());
   });
   $('compareA').addEventListener('change', renderCompare);
   $('compareB').addEventListener('change', renderCompare);
@@ -701,6 +865,7 @@ function wire() {
   $('exportPng').addEventListener('click', exportPng);
   $('customPartForm').addEventListener('submit', e => {
     e.preventDefault();
+    if (shared) return previewToast();
     if (!pro()) { toast('Your own parts are a Pro extra.'); return; }
     const where = $('customWhere').value;
     const part = {id: uid(), custom: true, brand: '', model: $('customName').value.trim().slice(0, 80) || 'Custom part', category: 'custom', formFactor: where === 'shelf' ? 'shelf' : '1U rack', rackUnits: where === 'shelf' ? 0 : num($('customU').value, 0.5, 20, 1), rackWidth: where === '19' ? 19 : 10, idleW: num($('customIdle').value, 0, 100000, 0), typicalW: num($('customTypical').value, 0, 100000, 0), maxW: null, confidence: 'estimate', source: '', notes: 'Added on this device.', popularity: 3};
@@ -714,7 +879,47 @@ function wire() {
   $('editForm').addEventListener('input', refreshSuggest);
   $('resetPart').addEventListener('click', resetEdit);
   $('closeEdit').addEventListener('click', () => $('editPart').close());
+  $('copyBuild').addEventListener('click', () => { copyBuildLink(); });
+  $('copyLink').addEventListener('click', () => { copyBuildLink(); });
+  $('saveCopy').addEventListener('click', saveSharedCopy);
+  $('nativeShare').addEventListener('click', async () => {
+    const url = await buildLink(shown());
+    if (typeof navigator.share !== 'function') { await copyBuildLink(); return; }
+    try { await navigator.share({title: shown().name || 'Homelab build', text: 'A homelab rack from Homelab Power.', url}); }
+    catch (err) { if (err && err.name === 'AbortError') return; toast('Couldn\'t open the share sheet. The copy button still works.'); }
+  });
+  document.body.addEventListener('input', e => {
+    const price = e.target.dataset?.priceFor;
+    if (price) {
+      const idea = ($('whatIfBody')._ideas || []).find(item => item.key === price);
+      const out = document.querySelector(`[data-payback-for="${CSS.escape(price)}"]`);
+      if (!idea || !out) return;
+      const raw = e.target.value.trim();
+      if (!raw) { out.textContent = ''; return; }
+      const amount = num(raw, 0, 1e9, 0);
+      const save = M.yearlySavings(idea.from, idea.to, currentRate().rate);
+      const months = M.payback(amount, save.year / 365);
+      out.textContent = months == null ? 'At this rate the swap doesn\'t pay for itself.' : `About ${fmt(months, 1)} months to earn that price back in electricity. Resale and repairs aren\'t in that.`;
+      return;
+    }
+    const battery = e.target.dataset?.battery;
+    if (battery) {
+      if (shared) return previewToast();
+      const item = findItem(battery);
+      if (!item) return;
+      const raw = e.target.value.trim();
+      item.batteryWh = raw === '' ? null : num(raw, 0, 100000, 0);
+      scheduleSave();
+    }
+  });
+  document.body.addEventListener('change', e => {
+    if (!e.target.dataset?.battery) return;
+    renderUps(shown());
+  });
   document.body.addEventListener('click', e => {
+    const swap = e.target.closest('[data-swap]');
+    if (swap) { applySwap(swap.dataset.swap); return; }
+    if (shared && e.target.closest('[data-edit], [data-add], [data-act], #loadPreset, #newBuild, #sendCalc, #customPartForm button')) return previewToast();
     const edit = e.target.closest('[data-edit]');
     if (edit) { openEdit(edit.dataset.edit); return; }
     const add = e.target.closest('[data-add]');
@@ -744,10 +949,12 @@ function wire() {
     if (!item) return;
     const raw = e.target.value.trim();
     item[field === 'idle' ? 'idleOverride' : 'typicalOverride'] = raw === '' ? null : num(raw, 0, 100000, 0);
+    if (shared) return;
     scheduleSave();
-    renderTotals(active());
+    renderTotals(shown());
   });
   document.addEventListener('pointerdown', e => {
+    if (shared) return;
     if (e.button != null && e.button !== 0) return;
     const el = e.target.closest('[data-drag]');
     if (!el || e.target.closest('button, a, input, select, textarea, label')) return;
@@ -793,6 +1000,10 @@ async function boot() {
   loadBook();
   loadCustom();
   loadCorrections();
+  if (location.hash.startsWith('#b=')) {
+    try { shared = hydrateShared(await window.PowerShare.decode(location.hash)); }
+    catch (err) { shared = null; toast(err.message || 'That link didn\'t open. Showing the build saved on this device.'); }
+  }
   const cats = [...new Set(allParts().map(p => p.category).filter(Boolean))].sort();
   $('partCategory').innerHTML += cats.map(c => `<option value="${esc(c)}">${esc(String(c).replace(/-/g, ' '))}</option>`).join('');
   $('presetSelect').innerHTML = presets.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');

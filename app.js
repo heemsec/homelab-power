@@ -8,7 +8,7 @@ let nextId=Date.now();
 const uid=()=>`d${nextId++}`;
 const presets={pi:['Raspberry Pi (estimate)',3,8],mini:['Mini PC (estimate)',8,35],rack:['Rack server (estimate)',120,280],nas:['NAS (estimate)',35,57],switch:['Network switch (estimate)',8,15],blank:['Custom device',0,0]};
 function makeDevice(kind){const p=presets[kind]||presets.blank;const drives=num($('drives').value,0,48,4);return {id:uid(),name:kind==='nas'?`NAS, ${drives} drives (estimate)`:p[0],idle:kind==='nas'?15+drives*5:p[1],load:kind==='nas'?25+drives*8:p[2],loadPct:20,hours:24,start:0,selected:true};}
-function defaults(){return {version:1,region:null,currency:'USD',rate:.20,tou:false,offRate:.15,peakRate:.35,peakStart:16,peakEnd:21,offStart:0,offEnd:7,consolidateWatts:55,replacementWatts:25,price:350,voltageMode:'120',voltage:120,breaker:15,devices:[makeDevice('rack'),makeDevice('nas'),makeDevice('mini'),makeDevice('switch'),makeDevice('pi')]};}
+function defaults(){return {version:1,region:null,currency:'USD',rate:.20,tou:false,offRate:.15,peakRate:.35,peakStart:16,peakEnd:21,offStart:0,offEnd:7,periods:[],consolidateWatts:55,replacementWatts:25,price:350,voltageMode:'120',voltage:120,breaker:15,devices:[makeDevice('rack'),makeDevice('nas'),makeDevice('mini'),makeDevice('switch'),makeDevice('pi')]};}
 function normalize(raw){
  if(!raw||typeof raw!=='object'||raw.version!==1||!Array.isArray(raw.devices)||raw.devices.length>100)throw Error('Invalid calculator data');
  const s={version:1,region:null,currency:currencies.includes(raw.currency)?raw.currency:'USD',tou:raw.tou===true};
@@ -16,6 +16,7 @@ function normalize(raw){
  for(const key of ['peakStart','peakEnd','offStart','offEnd'])s[key]=num(raw[key],0,23.99);
  for(const key of ['consolidateWatts','replacementWatts'])s[key]=num(raw[key],0,100000);
  s.price=num(raw.price,0,1e9);
+ s.periods=M.cleanPeriods(raw.periods);
  s.region=regions.some(r=>r.id===raw.region&&r.currency===s.currency&&r.rate===s.rate)&&!s.tou?raw.region:null;
  const eu=!!(s.region&&!String(s.region).startsWith('US'));
  s.voltageMode=raw.voltageMode==='120'||raw.voltageMode==='230'||raw.voltageMode==='custom'?raw.voltageMode:(eu?'230':'120');
@@ -67,7 +68,11 @@ function renderInputs(){
  for(const key of ['currency','rate','offRate','peakRate','peakStart','peakEnd','offStart','offEnd','consolidateWatts','replacementWatts','price'])$(key).value=state[key];
  $('tou').checked=state.tou;renderRegion();toggleRates();renderDevices();renderResults();
 }
-function toggleRates(){$('flatField').hidden=state.tou;document.querySelectorAll('.touField').forEach(el=>el.hidden=!state.tou);}
+function proOn(){try{if(localStorage.getItem('homelab-power-preview-pro')==='true')return true;}catch{}return !!(window.PowerEntitlement&&window.PowerEntitlement.hasPro());}
+function billingState(){return proOn()?state:{...state,tou:false};}
+function touMessage(){const issues=M.touIssues(state.periods||[]);if(!state.periods?.length)return '';if(issues.overlaps.length)return `Those periods overlap on ${issues.overlaps[0].day}. The first one in the list wins for the shared hours.`;if(issues.gaps.length)return `Some ${issues.gaps[0].day} hours aren't in a period, so they use the flat rate.`;return 'Every hour is covered, with no overlaps.';}
+function renderTou(){const extra=$('touExtra');if(!extra)return;extra.hidden=!state.tou;$('touProNote').textContent=proOn()?'A list of periods replaces the single peak window. Leave the list empty and the peak fields above are what the bill uses.':'Time-of-use is a Pro extra. The bill stays on your flat rate. Periods you set here are kept for when Pro is on.';$('touIssues').textContent=touMessage();$('touPeriods').innerHTML=(state.periods||[]).map((p,i)=>`<div class="settings-grid"><label>Name<input data-period-index="${i}" data-period-key="name" type="text" maxlength="40" value="${esc(p.name)}"></label><label>Price per kWh<input data-period-index="${i}" data-period-key="price" type="text" inputmode="decimal" value="${p.price}"></label><label>Starts<input data-period-index="${i}" data-period-key="start" type="text" inputmode="decimal" value="${p.start}" ${p.allDay?'disabled':''}></label><label>Ends<input data-period-index="${i}" data-period-key="end" type="text" inputmode="decimal" value="${p.end}" ${p.allDay?'disabled':''}></label><label>Days<select data-period-index="${i}" data-period-key="days"><option value="all"${p.days==='all'?' selected':''}>Every day</option><option value="weekday"${p.days==='weekday'?' selected':''}>Weekdays</option><option value="weekend"${p.days==='weekend'?' selected':''}>Weekends</option></select></label><label class="toggle"><input data-period-index="${i}" data-period-key="allDay" type="checkbox"${p.allDay?' checked':''}> All day</label><button type="button" class="quiet" data-period-remove="${i}">Remove period</button></div>`).join('');}
+function toggleRates(){$('flatField').hidden=state.tou;document.querySelectorAll('.touField').forEach(el=>el.hidden=!state.tou);renderTou();}
 function deviceInput(d,key,label,max,step='1'){return `<input data-id="${d.id}" data-key="${key}" aria-label="${esc(label)} for ${esc(d.name)}" type="text" inputmode="decimal" data-min="0" data-max="${max}" value="${d[key]}">`;}
 function renderDevices(){
  $('devices').innerHTML=state.devices.map(d=>`<tr><td><input data-id="${d.id}" data-key="selected" type="checkbox" aria-label="Include ${esc(d.name)} in the what-ifs" ${d.selected?'checked':''}></td><td><input data-id="${d.id}" data-key="name" aria-label="Name of this device" type="text" maxlength="100" value="${esc(d.name)}"></td><td>${deviceInput(d,'idle','Idle watts',100000,'.1')}</td><td>${deviceInput(d,'load','Load watts',100000,'.1')}</td><td>${deviceInput(d,'loadPct','Percent of time at load',100,'.1')}</td><td>${deviceInput(d,'hours','Hours on per day',24,'.5')}</td><td>${deviceInput(d,'start','Hour it starts',23.99,'.5')}</td><td class="avg" id="avg-${d.id}">${number(M.watts(d),1)}</td><td><button class="remove" data-remove="${d.id}" aria-label="Remove ${esc(d.name)}">×</button></td></tr>`).join('')||'<tr><td colspan="9" class="help">Nothing here yet. Add a preset, or start with a blank device.</td></tr>';
@@ -107,7 +112,9 @@ function renderCircuit(){
 }
 function renderResults(){
  renderCircuit();
- const base=M.integrate(state.devices,state), periods=[['Per day',1],['Per month',M.MONTH_DAYS],['Per year',365]];
+ const base=M.integrate(state.devices,billingState()), periods=[['Per day',1],['Per month',M.MONTH_DAYS],['Per year',365]];
+ const idleW=state.devices.reduce((a,d)=>a+(+d.idle||0),0),avgW=state.devices.reduce((a,d)=>a+M.watts(d),0);
+ $('heatLine').textContent=`Idle is about ${number(M.btuPerHour(idleW),1)} BTU/hr. The average mix is about ${number(M.btuPerHour(avgW),1)} BTU/hr. Heat is the same energy as the watts, just in BTU per hour. One watt is 3.412 BTU/hr.`;
  $('totals').innerHTML=periods.map(([label,days])=>`<article class="total-card"><p>${label}</p><strong>${money(base.cost*days)}</strong><p class="energy">${number(base.kwh*days)} kWh</p></article>`).join('');
  const items=base.devices.map((r,i)=>({...r,name:state.devices[i].name}));
  $('costRows').innerHTML=items.map(d=>`<tr><td>${esc(d.name)}</td>${periods.map(([,days])=>`<td>${money(d.cost*days)}<span>${number(d.kwh*days)} kWh</span></td>`).join('')}</tr>`).join('')||'<tr><td colspan="4">Add a device and its cost shows up here.</td></tr>';
@@ -128,7 +135,15 @@ for(const [key,[min,max]] of Object.entries(topLimits)){
  $(key).addEventListener('change',()=>{$(key).value=state[key];});
 }
 $('currency').addEventListener('change',()=>{state.currency=$('currency').value;state.region=null;renderRegion();renderResults();persist();});
-$('tou').addEventListener('change',()=>{state.tou=$('tou').checked;state.region=null;renderRegion();toggleRates();renderResults();persist();});
+$('tou').addEventListener('change',()=>{state.tou=$('tou').checked;state.region=null;renderRegion();toggleRates();renderResults();persist();if(state.tou&&!proOn())toast('Time-of-use is a Pro extra. The bill stays on your flat rate, and these periods are kept.');});
+function applyPeriodEdit(el){const i=+el.dataset.periodIndex,key=el.dataset.periodKey,p=state.periods?.[i];if(!p||!key)return;if(key==='name')p.name=el.value.slice(0,40);else if(key==='price')p.price=num(el.value,0,1000,0);else if(key==='start'||key==='end')p[key]=num(el.value,0,23.99,0);else if(key==='days')p.days=['all','weekday','weekend'].includes(el.value)?el.value:'all';else if(key==='allDay')p.allDay=el.checked;$('touIssues').textContent=touMessage();renderResults();persist();}
+$('touPeriods').addEventListener('input',e=>{if(e.target.dataset.periodKey&&e.target.dataset.periodKey!=='days'&&e.target.dataset.periodKey!=='allDay')applyPeriodEdit(e.target);});
+$('touPeriods').addEventListener('change',e=>{if(e.target.dataset.periodKey){applyPeriodEdit(e.target);if(e.target.dataset.periodKey==='allDay'||e.target.dataset.periodKey==='days')renderTou();}});
+$('touPeriods').addEventListener('click',e=>{const btn=e.target.closest('[data-period-remove]');if(!btn)return;state.periods.splice(+btn.dataset.periodRemove,1);renderTou();renderResults();persist();});
+function usePeriods(periods){state.periods=M.cleanPeriods(periods);state.tou=true;state.region=null;renderInputs();persist();if(!proOn())toast('Saved on this device. The bill stays on the flat rate until Pro is on.');}
+$('addPeriod').addEventListener('click',()=>{state.periods=state.periods||[];if(state.periods.length>=8){toast('Eight periods is the cap.');return;}state.periods.push({id:`p${Date.now()}`,name:'Off-peak',price:state.offRate,start:0,end:7,days:'all',allDay:false});state.tou=true;renderInputs();persist();});
+$('examplePeak').addEventListener('click',()=>usePeriods([{id:'peak',name:'Peak',price:.4,start:16,end:21,days:'weekday'},{id:'off',name:'Off-peak',price:.1,start:21,end:16,days:'weekday'},{id:'weekend',name:'Weekend off-peak',price:.1,start:0,end:0,days:'weekend',allDay:true}]));
+$('exampleShoulder').addEventListener('click',()=>usePeriods([{id:'peak',name:'Peak',price:.4,start:16,end:21,days:'weekday'},{id:'shoulder-day',name:'Shoulder',price:.22,start:7,end:16,days:'weekday'},{id:'shoulder-eve',name:'Shoulder evening',price:.22,start:21,end:23,days:'weekday'},{id:'off',name:'Off-peak',price:.12,start:23,end:7,days:'weekday'},{id:'weekend',name:'Weekend off-peak',price:.12,start:0,end:0,days:'weekend',allDay:true}]));
 $('preset').addEventListener('change',()=>{$('driveLabel').hidden=$('preset').value!=='nas';});
 $('add').addEventListener('click',()=>{if(state.devices.length>=100){toast('100 devices is the cap.');return;}state.devices.push(makeDevice($('preset').value));renderDevices();renderResults();persist();$('devices').querySelector('tr:last-child [data-key="name"]').focus();});
 const deviceMax={idle:100000,load:100000,loadPct:100,hours:24,start:23.99};
@@ -154,6 +169,7 @@ const packDefinitions={pi:[['Raspberry Pi (estimate)',3,8],['Small NAS, 2 drives
 $('starterPacks').addEventListener('click',e=>{const button=e.target.closest('[data-pack]');if(!button)return;const definitions=packDefinitions[button.dataset.pack];if(!definitions)return;const add=$('packMode').value==='add';if(add&&state.devices.length+definitions.length>100){toast('That pack would push you past 100 devices. Drop one, or replace the list.');return;}if(!add&&!confirm(`Replace your devices with ${button.textContent}? Rates and the other settings stay.`))return;const devices=definitions.map(([name,idle,load])=>({id:uid(),name,idle,load,loadPct:20,hours:24,start:0,selected:true}));state.devices=add?[...state.devices,...devices]:devices;renderDevices();renderResults();persist();toast(`${button.textContent} ${add?'added':'loaded'}. Treat the watts as a guess until you measure.`);});
 $('exportCSV').addEventListener('click',async()=>{if(window.NativeExportCSV){try{await window.NativeExportCSV(window.PowerCSV.export(state));toast('CSV is ready to save or share.');}catch{toast('CSV share was cancelled.');}return;}const blob=new Blob([window.PowerCSV.export(state)],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='homelab-power-costs.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('CSV downloaded. It has names, energy, costs, your rate, and the circuit settings.');});
 window.addEventListener('hashchange',()=>{if(!location.hash.startsWith('#s='))return;try{state=decode(location.hash);renderInputs();persist();toast('That shared setup is loaded.');}catch{toast('That share link didn\'t work. Kept what you already had.');}});
+window.addEventListener('power:pro',()=>{renderTou();renderResults();});
 window.PowerApp={getStateOrigin:()=>stateOrigin,getState:()=>JSON.parse(JSON.stringify(state)),normalize,defaults,replaceState:raw=>{state=normalize(raw);renderInputs();persist();},toast};
 renderInputs();persist();if(loadMessage)toast(loadMessage);
 })();

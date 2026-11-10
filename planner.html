@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Plan a homelab rack, see idle and typical watts, then send the build to the cost calculator.">
 <meta name="theme-color" content="#0b1215"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Homelab Power"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script src="theme.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="ui.css"><script src="version.js"></script><script src="math.js"></script><script src="entitlement.js"></script><script defer src="pwa.js"></script><script defer src="planner.js"></script>
+<script src="theme.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="ui.css"><script src="version.js"></script><script src="math.js"></script><script src="share.js"></script><script src="entitlement.js"></script><script defer src="pwa.js"></script><script defer src="planner.js"></script>
 <title>Build planner · Homelab Power</title>
 </head>
 <body>
@@ -29,12 +29,30 @@
 <p id="presetBlurb" class="help"></p>
 <button id="loadPreset" type="button">Load this build</button>
 </section>
+<div id="shareBanner" class="upsell" hidden>
+<p id="shareBannerText">This build came from a link. It's a preview until you keep a copy on this device.</p>
+<div class="pro-actions"><button id="saveCopy" type="button">Save a copy</button><button id="copyLink" type="button" class="secondary">Copy link</button><button id="nativeShare" type="button" class="secondary">Share</button></div>
+</div>
 <div class="totals-bar" aria-live="polite">
 <div><p>Idle</p><strong id="idleTotal">0 W</strong></div>
 <div><p>Typical</p><strong id="typicalTotal">0 W</strong></div>
+<div><p>Heat, idle</p><strong id="idleHeat">0</strong></div>
+<div><p>Heat, typical</p><strong id="typicalHeat">0</strong></div>
 <button id="sendCalc" type="button">Send to calculator</button>
+<button id="copyBuild" type="button" class="secondary">Copy link</button>
 </div>
+<p id="heatNote" class="help">Heat is the same energy as the watts, just in BTU per hour. One watt is 3.412 BTU/hr.</p>
 <p id="fitWarning" class="circuit-warning" role="status" hidden></p>
+<section class="card" id="upsCard" aria-labelledby="upsTitle" hidden>
+<h2 id="upsTitle">How long a UPS might last</h2>
+<div id="upsRuntime"></div>
+<p class="help">A published curve is for a new, full battery. The low end of that range is 60% of the curve, because an older pack often falls short. If the sheet only gives battery energy, the middle guess uses 85% inverter efficiency and 80% of the pack. The wide range runs from 80% efficient and 70% of the pack to 90% and 90%. Age, charge, and the room all move the real number.</p>
+</section>
+<section class="card" id="whatIfCard" aria-labelledby="whatIfTitle">
+<div class="section-heading"><div><p class="step">WHAT IF</p><h2 id="whatIfTitle">Where the yearly cost sits</h2></div></div>
+<p id="whatIfLock" class="upsell">Swapping parts in a copy of the build is a Pro extra. The ranking below stays visible either way. On Android that's the Play Billing unlock. Here, Preview Pro lets you try it. The build you already have is left as it is.</p>
+<div id="whatIfBody"></div>
+</section>
 <div class="planner-layout">
 <section class="card" aria-labelledby="layoutTitle"><h2 id="layoutTitle">Layout</h2><p id="frameNote" class="help"></p><div id="rackVisual" class="rack-scroll" tabindex="0" role="region" aria-label="Rack layout"></div><h3>Parts in this build</h3><div id="itemList"></div></section>
 <section class="card" aria-labelledby="catalogTitle"><h2 id="catalogTitle">Parts</h2>

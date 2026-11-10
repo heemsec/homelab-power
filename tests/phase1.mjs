@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
 
-const port = 9876;
+const port = 9891;
 const base = `http://127.0.0.1:${port}`;
 const server = spawn('python3', ['-m', 'http.server', String(port)], { cwd: fileURLToPath(new URL('..', import.meta.url)), stdio: 'ignore' });
 await once(server, 'spawn');
