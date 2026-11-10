@@ -4,18 +4,18 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Plan a homelab rack, see idle and typical watts, then send the build to the cost calculator.">
 <meta name="theme-color" content="#0b1215"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Homelab Power"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script src="theme.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="ui.css"><script src="entitlement.js"></script><script defer src="pwa.js"></script><script defer src="planner.js"></script>
+<script src="theme.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="ui.css"><script src="version.js"></script><script src="math.js"></script><script src="entitlement.js"></script><script defer src="pwa.js"></script><script defer src="planner.js"></script>
 <title>Build planner · Homelab Power</title>
 </head>
 <body>
 <header class="topbar"><a class="brand" href="index.html" aria-label="Homelab Power, calculator"><span class="logo">ϟ</span> HOMELAB <b>POWER</b></a><span class="privacy"><span class="dot"></span> On this device. No tracking.</span></header>
 <nav class="sitenav" aria-label="Sections"><a href="index.html">Calculator</a><a href="planner.html" aria-current="page">Planner</a><a href="settings.html">Settings</a></nav>
-<main class="page-intro">
+<main>
+<div class="page-intro">
 <p class="eyebrow">BUILD PLANNER</p>
 <h1>Sketch the rack. Then look at the watts.</h1>
 <p class="help" id="poeNote">These are typical numbers, and your own wall meter beats them. Switch figures leave out PoE. PoE devices are listed on their own, so don't count that load twice.</p>
-</main>
-<main>
+</div>
 <section class="card" aria-labelledby="rackTitle"><div class="section-heading"><div><p class="step">THE RACK</p><h2 id="rackTitle">How big is it?</h2></div></div>
 <div class="settings-grid">
 <div class="choice-stack" role="radiogroup" aria-label="Rack width"><span>Width</span><label class="toggle"><input type="radio" name="rackWidth" id="rackWidth10" value="10" checked> 10 inch</label><label class="toggle"><input type="radio" name="rackWidth" id="rackWidth19" value="19"> 19 inch</label></div>
@@ -61,6 +61,29 @@
 </div>
 </section>
 </main>
+<dialog id="editPart" aria-labelledby="editTitle">
+<form id="editForm" class="dialog-body">
+<h2 id="editTitle">Edit this part</h2>
+<p id="editOriginal" class="help"></p>
+<p><a id="editSource" href="" target="_blank" rel="noopener noreferrer" hidden>Original source</a></p>
+<div class="settings-grid">
+<label>Name<input id="editName" type="text" maxlength="80" required></label>
+<label>Idle watts<input id="editIdle" type="text" inputmode="decimal" required></label>
+<label>Typical watts<input id="editTypical" type="text" inputmode="decimal" required></label>
+<label>Max watts<input id="editMax" type="text" inputmode="decimal" aria-describedby="editHint"></label>
+<label>Rack units<input id="editU" type="text" inputmode="decimal" aria-describedby="editHint"></label>
+<label>Width<select id="editWidth"><option value="10">10 inch rack</option><option value="19">19 inch rack</option><option value="none">Shelf / outside the rack</option></select></label>
+<label>Form factor<input id="editForm" type="text" maxlength="80"></label>
+</div>
+<p id="editHint" class="help">On a 10 inch rack, half a U is a real step.</p>
+<div class="pro-actions">
+<button type="submit">Save correction</button>
+<button id="resetPart" type="button" class="secondary">Reset to original</button>
+<button id="closeEdit" type="button" class="quiet">Close</button>
+</div>
+<p class="help"><a id="suggestFix" href="https://github.com/heemsec/homelab-power/issues/new" target="_blank" rel="noopener noreferrer">Suggest a fix</a>. That opens a GitHub issue with the part id and the old and new values. Nothing is sent until you click it.</p>
+</form>
+</dialog>
 <div id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

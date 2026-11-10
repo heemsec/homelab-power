@@ -4,7 +4,7 @@ const KEY = 'homelab-power-settings-v1';
 const THEME = 'homelab-power-theme';
 const SAVE_PAUSE = 400;
 const $ = id => document.getElementById(id);
-const KNOWN = [KEY, 'homelab-power-v1', 'homelab-power-builds-v1', 'homelab-power-custom-parts-v1', 'homelab-power-profiles-v1', THEME, 'homelab-power-preview-pro'];
+const KNOWN = [KEY, 'homelab-power-v1', 'homelab-power-builds-v1', 'homelab-power-custom-parts-v1', 'homelab-power-corrections-v1', 'homelab-power-profiles-v1', THEME, 'homelab-power-preview-pro'];
 let saveTimer = 0;
 let ready = false;
 function num(v, lo, hi, fallback) {
@@ -128,7 +128,9 @@ for (const id of ['currency', 'rate', 'numberFormat', 'voltageMode', 'voltage'])
 for (const id of ['currency', 'numberFormat', 'voltageMode']) $(id).addEventListener('change', schedule);
 $('voltageMode').addEventListener('change', () => { $('voltageField').hidden = $('voltageMode').value !== 'custom'; });
 for (const radio of document.querySelectorAll('input[name="theme"]')) radio.addEventListener('change', () => { applyTheme(radio.value); schedule(); });
+$('aboutVersion').textContent = window.HOMELAB_VERSION || '';
 $('backup').addEventListener('click', backup);
+$('restoreBtn').addEventListener('click', () => $('restore').click());
 $('restore').addEventListener('change', () => { const file = $('restore').files[0]; if (file) restore(file); $('restore').value = ''; });
 $('clearData').addEventListener('click', clearAll);
 ready = false;

@@ -38,5 +38,10 @@ function integrate(devices,s,options={}){
  return {kwh:average(weekday.kwh,weekend.kwh),cost:average(weekday.cost,weekend.cost),devices:weekday.devices.map((d,i)=>({id:d.id,kwh:average(d.kwh,weekend.devices[i].kwh),cost:average(d.cost,weekend.devices[i].cost)}))};
 }
 function payback(price,dailySavings){return dailySavings>0?price/(dailySavings*MONTH_DAYS):null;}
-return {MONTH_DAYS,parse,clamp,inWindow,windowHours,watts,rateAt,integrateDay,integrate,payback};
+// Continuous draw. Month length matches the calculator: 365/12.
+function energyCost(watts, rate){
+ const w=Number(watts)||0, r=Number(rate)||0, kwhDay=w*24/1000;
+ return {kwhDay, kwhMonth:kwhDay*MONTH_DAYS, kwhYear:kwhDay*365, month:kwhDay*MONTH_DAYS*r, year:kwhDay*365*r};
+}
+return {MONTH_DAYS,parse,clamp,inWindow,windowHours,watts,rateAt,integrateDay,integrate,payback,energyCost};
 });
