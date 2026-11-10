@@ -398,7 +398,7 @@ function runtimeSentence(part, item, load, label) {
   const rated = Number(part.ratedW);
   const over = Number.isFinite(rated) && rated > 0 && load > rated + 1e-6;
   const name = label === 'idle' ? 'Idle' : 'Typical';
-  if (over) return `<p class="circuit-warning"><strong>Over the rating.</strong> ${name} load elsewhere is ${wattsText(load)}, and this UPS is rated ${wattsText(rated)}.</p>`;
+  if (over) return `<p class="circuit-warning load-over"><strong>Over the rating.</strong> ${name} load elsewhere is ${wattsText(load)}, and this UPS is rated ${wattsText(rated)}.</p>`;
   if (Array.isArray(part.runtimeCurve) && part.runtimeCurve.length) {
     const hit = M.interpolateRuntime(part.runtimeCurve, load);
     return `<p>${name}: ${minutesPhrase(hit)} at ${wattsText(load)} on the other gear. The top of the range is the published curve. The low end is 60% of that, for an older battery.</p>`;

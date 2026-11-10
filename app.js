@@ -100,13 +100,16 @@ function renderCircuit(){
  if(document.activeElement!==$('breaker'))$('breaker').value=state.breaker;
  const volts=state.voltage;
  const rows=state.devices.map(d=>({name:d.name,watts:d.load,amps:d.load/volts}));
- const watts=rows.reduce((a,r)=>a+r.watts,0),amps=watts/volts,limit=state.breaker*0.8,over=amps>limit+1e-9;
- $('circuitStats').innerHTML=`<article class="circuit-stat"><p>Load watts combined</p><strong>${number(watts,1)} W</strong></article><article class="circuit-stat"><p>Amps at load</p><strong>${number(amps,2)} A</strong></article><article class="circuit-stat"><p>80% of a ${esc(number(state.breaker,2))} A breaker</p><strong>${number(limit,2)} A</strong></article>`;
+ const watts=rows.reduce((a,r)=>a+r.watts,0),amps=watts/volts,limit=state.breaker*0.8,over=amps>limit+1e-9,heavy=!over&&amps>state.breaker*0.5;
+ const level=over?'over':heavy?'heavy':'ok';
+ $('circuitStats').innerHTML=`<article class="circuit-stat load-${level}"><p>Load watts combined</p><strong>${number(watts,1)} W</strong></article><article class="circuit-stat load-${level}"><p>Amps at load</p><strong>${number(amps,2)} A</strong></article><article class="circuit-stat"><p>80% of a ${esc(number(state.breaker,2))} A breaker</p><strong>${number(limit,2)} A</strong></article>`;
  const status=$('circuitStatus');
- status.className=over?'circuit-warning':'circuit-ok';
- status.dataset.amps=String(amps);status.dataset.limit=String(limit);status.dataset.over=String(over);status.dataset.watts=String(watts);status.dataset.voltage=String(volts);status.dataset.breaker=String(state.breaker);
+ status.className=over?'circuit-warning load-over':heavy?'circuit-ok load-heavy':'circuit-ok load-ok';
+ status.dataset.amps=String(amps);status.dataset.limit=String(limit);status.dataset.over=String(over);status.dataset.level=level;status.dataset.watts=String(watts);status.dataset.voltage=String(volts);status.dataset.breaker=String(state.breaker);
  status.innerHTML=over
-  ?`<strong>Warning.</strong> ${esc(number(amps,2))} A at load is past 80% of this breaker (${esc(number(limit,2))} A on a ${esc(number(state.breaker,2))} A breaker). Load watts are what trip it. The bill doesn't change.`
+  ?`<strong>Over the limit.</strong> ${esc(number(amps,2))} A at load is past 80% of this breaker (${esc(number(limit,2))} A on a ${esc(number(state.breaker,2))} A breaker). Load watts are what trip it. The bill doesn't change.`
+  :heavy
+  ?`<strong>Getting close.</strong> ${esc(number(amps,2))} A at load is over half of this ${esc(number(state.breaker,2))} A breaker, and still under the 80% line (${esc(number(limit,2))} A).`
   :`<strong>Under the limit.</strong> ${esc(number(amps,2))} A at load, and 80% of this ${esc(number(state.breaker,2))} A breaker is ${esc(number(limit,2))} A. Checked with load watts, not the average the bill uses.`;
  $('circuitRows').innerHTML=rows.length?`<div class="table-scroll" tabindex="0" role="region" aria-label="Amps at load for each device"><table class="amp-table"><caption class="sr-only">Amps at load for each device. That's load watts divided by the mains voltage.</caption><thead><tr><th scope="col">Device</th><th scope="col">Load W</th><th scope="col">Amps</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${number(r.watts,1)}</td><td>${number(r.amps,2)} A</td></tr>`).join('')}</tbody></table></div>`:'<p class="help">Add a device and the amps show up here.</p>';
 }

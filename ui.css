@@ -13,7 +13,38 @@
  .sitenav a{flex:1;text-align:center;padding:16px 6px;min-height:48px}
 }
 
-.page-intro{max-width:none;padding-top:28px}
+.page-intro{max-width:none;padding-top:var(--space-4)}
+.bento{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-2);align-items:stretch}
+.bento-span{grid-column:1/-1}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--space-2);min-width:0}
+.stat p{margin:0;color:var(--muted);font-size:12px}
+.stat strong,.total-card strong,.circuit-stat strong,.totals-bar strong{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.stat strong{display:block;margin-top:var(--space-1);font-size:clamp(28px,4vw,40px);letter-spacing:-.04em;line-height:1.1}
+.stat-actions{display:flex;flex-direction:column;gap:var(--space-1);justify-content:center}
+.card{box-shadow:var(--shadow)}
+button{box-shadow:var(--shadow-raise);min-height:48px}
+button:hover{transform:translateY(-1px)}
+button:active{transform:translateY(1px);box-shadow:var(--shadow-press)}
+button.secondary,button.quiet{box-shadow:none}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.total-card:last-child strong,.stat:nth-child(2) strong{color:var(--accent)}
+.load-ok strong{color:var(--load-ok)}
+.load-heavy{border-color:var(--load-heavy)}
+.load-heavy strong{color:var(--load-heavy)}
+.load-over,.circuit-warning.load-over{border-color:var(--load-over);background:color-mix(in srgb,var(--load-over) 18%,var(--card));color:var(--text)}
+.load-over strong,.circuit-warning.load-over strong{color:var(--load-over)}
+.circuit-ok.load-heavy{border-color:var(--load-heavy);background:color-mix(in srgb,var(--load-heavy) 16%,var(--card))}
+.circuit-ok.load-ok{border-color:var(--load-ok)}
+.results-grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr)}
+@media(max-width:900px){
+ .bento,.results-grid,.scenario-grid,.totals,.circuit-summary{grid-template-columns:1fr}
+ .bento-span,.results-grid.bento-span{grid-column:auto}
+ .stat-actions button{width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+ button,.bar-fill{transition:none}
+ button:hover,button:active{transform:none}
+}
 .planner-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:18px;align-items:start}
 .totals-bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:8px 0 16px}
 .totals-bar strong{font-size:28px;letter-spacing:-.6px}
