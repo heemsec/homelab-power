@@ -25,7 +25,7 @@ try {
   await page.click('#loadPreset');
   await page.waitForFunction(() => Number(document.querySelector('#idleTotal')?.dataset.w) > 15);
   const heat = Number(await page.locator('#idleHeat').getAttribute('data-btu'));
-  check(Math.abs(heat - 19.1 * 3.412) < 0.02, `idle heat is watts times 3.412 (${heat})`);
+  check(Math.abs(heat - 18.1 * 3.412) < 0.02, `idle heat is watts times 3.412 (${heat})`);
   check(/3\.412/.test(await page.locator('#heatNote').innerText()), 'heat note explains the conversion');
 
   await page.click('#copyBuild');
@@ -36,7 +36,7 @@ try {
   await preview.waitForSelector('#shareBanner:not([hidden])');
   check(/preview/i.test(await preview.locator('#shareBanner').innerText()), 'shared link opens a preview');
   const sharedIdle = Number(await preview.locator('#idleTotal').getAttribute('data-w'));
-  check(Math.abs(sharedIdle - 19.1) < 0.05, `preview keeps the watts (${sharedIdle})`);
+  check(Math.abs(sharedIdle - 18.1) < 0.05, `preview keeps the watts (${sharedIdle})`);
   await preview.click('#saveCopy');
   await preview.waitForFunction(() => document.querySelector('#shareBanner').hidden);
   const saved = await preview.evaluate(() => JSON.parse(localStorage.getItem('homelab-power-builds-v1')).builds.length);

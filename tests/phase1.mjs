@@ -59,9 +59,9 @@ try {
   const idle = await page.locator('#idleTotal').innerText();
   const typical = await page.locator('#typicalTotal').innerText();
   const precise = Number(await page.locator('#typicalTotal').getAttribute('data-w'));
-  check(/19\.1 W/.test(idle), `idle shows one decimal (${idle})`);
-  check(Math.abs(precise - 23.65) < 0.02, `typical stays precise (${precise})`);
-  check(/23\.7 W/.test(typical), `23.65 W displays as 23.7 (${typical})`);
+  check(/18\.1 W/.test(idle), `idle shows one decimal (${idle})`);
+  check(Math.abs(precise - 22.05) < 0.02, `typical stays precise (${precise})`);
+  check(/22\.1 W/.test(typical), `22.05 W displays as 22.1 (${typical})`);
   check(await page.locator('#fitWarning').isHidden(), 'Nick preset fits with no warning');
   const zero = await page.locator('#rackZero').innerText();
   check(/0U top \/ rear/.test(zero) && /fan/i.test(zero), 'fan is visible as a 0U top/rear part');
@@ -87,13 +87,13 @@ try {
   await page.click('#editForm button[type="submit"]');
   await page.waitForFunction(() => !document.querySelector('#editPart[open]'));
   const editedIdle = Number(await page.locator('#idleTotal').getAttribute('data-w'));
-  check(Math.abs(editedIdle - 15.1) < 0.05, `edited idle total is 15.1 (${editedIdle})`);
+  check(Math.abs(editedIdle - 14.1) < 0.05, `edited idle total is 14.1 (${editedIdle})`);
   check(/Edited/.test(await page.locator('#catalog').innerText()), 'edited badge shows');
 
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => Number(document.querySelector('#idleTotal')?.dataset.w) > 10);
   const saved = Number(await page.locator('#idleTotal').getAttribute('data-w'));
-  check(Math.abs(saved - 15.1) < 0.05, `saved build keeps the correction (${saved})`);
+  check(Math.abs(saved - 14.1) < 0.05, `saved build keeps the correction (${saved})`);
 
   await page.fill('#partSearch', 'M720q');
   await page.click('[data-edit="lenovo-thinkcentre-m720q-tiny"]');
@@ -105,14 +105,14 @@ try {
   await page.fill('#partSearch', 'M720q');
   await page.click('[data-edit="lenovo-thinkcentre-m720q-tiny"]');
   await page.click('#resetPart');
-  await page.waitForFunction(() => document.querySelector('#fitWarning').hidden && Math.abs(Number(document.querySelector('#idleTotal').dataset.w) - 19.1) < 0.05);
-  check(true, 'reset restores the original fit and the 19.1 W idle');
+  await page.waitForFunction(() => document.querySelector('#fitWarning').hidden && Math.abs(Number(document.querySelector('#idleTotal').dataset.w) - 18.1) < 0.05);
+  check(true, 'reset restores the original fit and the 18.1 W idle');
 
   await page.fill('#partSearch', 'M720q');
   await page.click('[data-edit="lenovo-thinkcentre-m720q-tiny"]');
   await page.fill('#editIdle', '7');
   await page.click('#editForm button[type="submit"]');
-  await page.waitForFunction(() => Math.abs(Number(document.querySelector('#idleTotal').dataset.w) - 17.1) < 0.05);
+  await page.waitForFunction(() => Math.abs(Number(document.querySelector('#idleTotal').dataset.w) - 16.1) < 0.05);
 
   const settings = await context.newPage();
   await settings.setViewportSize({ width: 390, height: 844 });
@@ -136,7 +136,7 @@ try {
   check(restored === 7, `backup round-trip kept idle 7 (${restored})`);
 
   await page.reload({ waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => Math.abs(Number(document.querySelector('#idleTotal')?.dataset.w) - 17.1) < 0.05);
+  await page.waitForFunction(() => Math.abs(Number(document.querySelector('#idleTotal')?.dataset.w) - 16.1) < 0.05);
   check(true, 'planner still shows the restored correction');
 
   await page.click('#previewPro');

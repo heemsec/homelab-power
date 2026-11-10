@@ -37,9 +37,9 @@
         "qty": 1
       }
     ],
-    "estIdleW": 19.1,
-    "estTypicalW": 23.6,
-    "notes": "The power hub is the Blazin3D 1U 10\" hub (12 AC + 6 USB). Its draw is an estimate of about 0.5 W. The monitor is counted as always on."
+    "estIdleW": 18.1,
+    "estTypicalW": 22.1,
+    "notes": "The power hub is the Blazin3D 1U 10\" hub (12 AC + 6 USB). Its draw is an estimate of about 0.5 W. The fan runs off the hub's USB charger, and the charger's loss is counted in the fan's figure. The monitor is counted as always on."
   },
   {
     "id": "10in-tiny-cluster",
@@ -75,8 +75,8 @@
         "qty": 1
       }
     ],
-    "estIdleW": 53.3,
-    "estTypicalW": 65.7,
+    "estIdleW": 48.0,
+    "estTypicalW": 60.2,
     "notes": ""
   },
   {
@@ -105,7 +105,7 @@
         "qty": 1
       }
     ],
-    "estIdleW": 16.2,
+    "estIdleW": 15.0,
     "estTypicalW": 21.0,
     "notes": "Pi figures exclude NVMe HATs; add ~1-3 W each if used."
   },
@@ -185,8 +185,8 @@
         "qty": 1
       }
     ],
-    "estIdleW": 156.7,
-    "estTypicalW": 211.2,
+    "estIdleW": 157.7,
+    "estTypicalW": 216.2,
     "notes": "DS920+ uses its 'access' figure with 4 drives. APs are PoE-powered from the switch, so their draw is listed separately (add ~10% PoE loss if you want to be strict)."
   },
   {
@@ -227,8 +227,8 @@
         "qty": 1
       }
     ],
-    "estIdleW": 72.1,
-    "estTypicalW": 105.7,
+    "estIdleW": 74.6,
+    "estTypicalW": 108.2,
     "notes": ""
   },
   {
@@ -291,7 +291,7 @@
         "qty": 1
       }
     ],
-    "estIdleW": 101.5,
+    "estIdleW": 98.0,
     "estTypicalW": 146.5,
     "notes": "Add ~10-15 W per MS-01 if you install ConnectX cards."
   },
@@ -329,8 +329,8 @@
         "qty": 1
       }
     ],
-    "estIdleW": 366.1,
-    "estTypicalW": 498.9,
+    "estIdleW": 345.6,
+    "estTypicalW": 453.3,
     "notes": "R720xd figure already includes a few drives' worth of backplane draw; adding 12 drives on top makes this a deliberately conservative total."
   },
   {
@@ -359,8 +359,8 @@
         "qty": 1
       }
     ],
-    "estIdleW": 23.2,
-    "estTypicalW": 33.7,
+    "estIdleW": 18.6,
+    "estTypicalW": 28.9,
     "notes": ""
   }
 ]
