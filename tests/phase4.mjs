@@ -59,6 +59,9 @@ try {
   }));
   check(fallen.palette === 'homelab' && fallen.choice === 'nordic', `Pro loss falls back without forgetting (${fallen.palette} / ${fallen.choice})`);
 
+  await page.evaluate(() => localStorage.setItem('homelab-power-preview-pro', 'true'));
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(200);
   const [download] = await Promise.all([page.waitForEvent('download'), page.click('#backup')]);
   const path = await download.path();
   const backup = JSON.parse(await (await import('node:fs')).promises.readFile(path, 'utf8'));

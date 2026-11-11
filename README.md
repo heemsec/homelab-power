@@ -8,7 +8,7 @@ It all happens in the browser. No account, no tracking, and no server. Labs are 
 
 Privacy policy: https://heemsec.github.io/homelab-power/privacy.html
 
-The Android app can sell a one-time Pro unlock and three optional tips. That wiring is described in [BILLING.md](BILLING.md). The web build does not offer either.
+The Android app can sell a one-time Pro unlock and three optional tips. That wiring is described in [BILLING.md](BILLING.md). The web build does not offer either. Pro also covers a backup file you can download or bring back. The lab on the device, and share links, stay free.
 
 GitHub Pages serves the site from the repository root:
 

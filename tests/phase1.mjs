@@ -117,7 +117,13 @@ try {
   const settings = await context.newPage();
   await settings.setViewportSize({ width: 390, height: 844 });
   await settings.goto(`${base}/settings.html`, { waitUntil: 'domcontentloaded' });
-  check((await settings.locator('#aboutVersion').innerText()) === '1.3.1', 'About reads the single version');
+  check((await settings.locator('#aboutVersion').innerText()) === '1.3.2', 'About reads the single version');
+  check(await settings.locator('#backup .pro-badge').isVisible(), 'backup stays visible with a Pro badge');
+  await settings.click('#backup');
+  check(await settings.locator('#proPrompt').evaluate(el => el.open), 'a locked backup opens the Pro prompt');
+  await settings.click('#proPromptClose');
+  await settings.evaluate(() => localStorage.setItem('homelab-power-preview-pro', 'true'));
+  await settings.reload({ waitUntil: 'domcontentloaded' });
   const [download] = await Promise.all([
     settings.waitForEvent('download'),
     settings.click('#backup')
@@ -126,6 +132,8 @@ try {
   settings.once('dialog', dialog => dialog.accept());
   await settings.click('#clearData');
   await settings.waitForTimeout(200);
+  await settings.evaluate(() => localStorage.setItem('homelab-power-preview-pro', 'true'));
+  await settings.reload({ waitUntil: 'domcontentloaded' });
   settings.once('dialog', dialog => dialog.accept());
   await settings.setInputFiles('#restore', backupPath);
   await settings.waitForFunction(() => (document.querySelector('#backupStatus')?.textContent || '').includes('Restored'));
@@ -134,6 +142,7 @@ try {
     return raw?.parts?.['lenovo-thinkcentre-m720q-tiny']?.idleW;
   });
   check(restored === 7, `backup round-trip kept idle 7 (${restored})`);
+  await settings.evaluate(() => localStorage.removeItem('homelab-power-preview-pro'));
 
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => Math.abs(Number(document.querySelector('#idleTotal')?.dataset.w) - 16.1) < 0.05);

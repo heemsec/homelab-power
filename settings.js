@@ -67,9 +67,49 @@ function paintLocks() {
     const card = input.closest('.swatch');
     if (card) card.classList.toggle('is-locked', !pro);
   }
+  for (const id of ['backup', 'restoreBtn']) {
+    const button = $(id);
+    if (!button) continue;
+    button.classList.toggle('is-pro-locked', !pro);
+    const badge = button.querySelector('.pro-badge');
+    if (badge) badge.hidden = pro;
+  }
   const choice = (document.querySelector('input[name="palette"]:checked') || {}).value;
   const held = (choice === 'nordic' || choice === 'amber') && !pro;
   $('paletteUpsell').hidden = !held;
+  const go = $('proPromptGo');
+  if (go) go.textContent = storeMode() ? 'Get Pro' : 'Turn on Preview Pro';
+}
+function storeMode() {
+  return !!(window.NativeBilling || (window.PowerEntitlement && window.PowerEntitlement.usesStore && window.PowerEntitlement.usesStore()));
+}
+function openProPrompt() {
+  const dialog = $('proPrompt');
+  if (dialog && !dialog.open) dialog.showModal();
+}
+function closeProPrompt() {
+  const dialog = $('proPrompt');
+  if (dialog && dialog.open) dialog.close();
+}
+async function acceptProPrompt() {
+  closeProPrompt();
+  if (storeMode() && window.NativeBilling && window.NativeBilling.purchase) {
+    let result;
+    try { result = await window.NativeBilling.purchase('pro_unlock'); }
+    catch { result = null; }
+    if (result && result.pro === true) {
+      try { localStorage.setItem('homelab-power-pro', 'true'); } catch {}
+      if (window.PowerEntitlement && window.PowerEntitlement.setStore) window.PowerEntitlement.setStore({pro: true, supporter: result.supporter === true});
+      window.dispatchEvent(new Event('power:entitlement'));
+      $('backupStatus').textContent = 'Pro is on. You can download or restore a file now.';
+    }
+    return;
+  }
+  try { localStorage.setItem('homelab-power-preview-pro', 'true'); } catch {}
+  if (window.PowerEntitlement && !(window.PowerEntitlement.usesStore && window.PowerEntitlement.usesStore())) window.PowerEntitlement.setPreview(true);
+  paintLocks();
+  if (window.HomelabTheme) window.HomelabTheme.apply();
+  $('backupStatus').textContent = 'Preview Pro is on. You can download or restore a file now.';
 }
 function applyTheme(theme) {
   if (window.HomelabTheme) window.HomelabTheme.setMode(theme === 'light' || theme === 'dark' ? theme : 'system');
@@ -105,6 +145,7 @@ function download(name, text) {
   a.click();
 }
 function backup() {
+  if (!hasPro()) { openProPrompt(); return; }
   flush();
   const dump = {app: 'homelab-power', version: 1, exportedAt: new Date().toISOString()};
   for (const key of KNOWN) {
@@ -126,6 +167,7 @@ function validate(data) {
   return '';
 }
 async function restore(file) {
+  if (!hasPro()) { openProPrompt(); return; }
   let data;
   try { data = JSON.parse(await file.text()); }
   catch { $('backupStatus').textContent = 'That file isn\'t JSON.'; return; }
@@ -179,8 +221,10 @@ $('aboutVersion').textContent = window.HOMELAB_VERSION || '';
 window.addEventListener('power:pro', () => { paintLocks(); if (window.HomelabTheme) window.HomelabTheme.apply(); });
 window.addEventListener('power:entitlement', () => { paintLocks(); if (window.HomelabTheme) window.HomelabTheme.apply(); });
 $('backup').addEventListener('click', backup);
-$('restoreBtn').addEventListener('click', () => $('restore').click());
-$('restore').addEventListener('change', () => { const file = $('restore').files[0]; if (file) restore(file); $('restore').value = ''; });
+$('restoreBtn').addEventListener('click', () => { if (!hasPro()) { openProPrompt(); return; } $('restore').click(); });
+$('restore').addEventListener('change', () => { const file = $('restore').files[0]; $('restore').value = ''; if (file) restore(file); });
+$('proPromptGo').addEventListener('click', acceptProPrompt);
+$('proPromptClose').addEventListener('click', closeProPrompt);
 $('clearData').addEventListener('click', clearAll);
 ready = false;
 paint(read());
