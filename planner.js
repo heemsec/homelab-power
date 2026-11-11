@@ -890,7 +890,7 @@ function wire() {
   $('buildSelect').addEventListener('change', () => { book.activeId = $('buildSelect').value; scheduleSave(); render(); });
   $('newBuild').addEventListener('click', () => {
     if (shared) return previewToast();
-    if (!pro() && book.builds.length >= 1) { $('proUpsell').hidden = false; toast(E.usesStore && E.usesStore() ? 'One saved build is free. Get Pro in Settings if you want another.' : 'One saved build is free. Preview Pro if you want another.'); return; }
+    if (!pro() && book.builds.length >= 1) { $('proUpsell').hidden = false; toast(E.usesStore && E.usesStore() ? 'One saved build is free. Get Pro is on the calculator if you want another.' : 'One saved build is free. Preview Pro if you want another.'); return; }
     const b = emptyBuild('Another build');
     book.builds.push(b); book.activeId = b.id; scheduleSave(); render();
   });
@@ -919,7 +919,7 @@ function wire() {
   $('customPartForm').addEventListener('submit', e => {
     e.preventDefault();
     if (shared) return previewToast();
-    if (!pro()) { toast(E.usesStore && E.usesStore() ? 'Your own parts are part of Pro. Get Pro in Settings if you want to add one.' : 'Your own parts are a Pro extra.'); return; }
+    if (!pro()) { toast(E.usesStore && E.usesStore() ? 'Your own parts are part of Pro. Get Pro is on the calculator.' : 'Your own parts are a Pro extra.'); return; }
     const where = $('customWhere').value;
     const part = {id: uid(), custom: true, brand: '', model: $('customName').value.trim().slice(0, 80) || 'Custom part', category: 'custom', formFactor: where === 'shelf' ? 'shelf' : '1U rack', rackUnits: where === 'shelf' ? 0 : num($('customU').value, 0.5, 20, 1), rackWidth: where === '19' ? 19 : 10, idleW: num($('customIdle').value, 0, 100000, 0), typicalW: num($('customTypical').value, 0, 100000, 0), maxW: null, confidence: 'estimate', source: '', notes: 'Added on this device.', popularity: 3};
     custom.push(part);

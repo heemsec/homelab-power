@@ -18,8 +18,8 @@ Prices on the buttons are the localized strings Play returns. The app does not i
 ## Where it shows up
 
 - Web and the installed page: Preview Pro stays as it is. Tip buttons are not in the page.
-- Android, calculator: Preview Pro is hidden. **Get Pro** and **Restore purchases** sit with the labs. The three tips are there too.
-- Android, Settings: a **Leave a tip** section, with Get Pro, the three tips, and Restore. Hidden on the web.
+- Android, calculator: Preview Pro is hidden. **Get Pro** and **Restore purchases** sit with the labs. No tip buttons there.
+- Android, Settings: a **Leave a tip** section with the three tips and Restore. No Get Pro button, and it stays hidden on the web.
 - Android, planner: Preview Pro is hidden. The extras point at Get Pro in Settings. Buying still happens through the same plugin.
 
 Pro gating for labs, comparisons, import, the printable report, extra builds, custom parts, and the Nordic and Amber themes follows Play's answer inside the app. On the web, Preview Pro still opens those.

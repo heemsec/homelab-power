@@ -18,9 +18,11 @@ function view(state){
  const pending=Array.isArray(s.pendingTips)?s.pendingTips:[];
  return {
   pro:s.pro===true,supporter:false,status,
+  proName:s.pro?'Pro is yours':s.proPending?'Payment pending':'Get Pro',
+  proPrice:s.pro||s.proPending?'':(price||''),
   proLabel:s.pro?'Pro is yours':s.proPending?'Payment pending':price?`Get Pro (${price})`:'Get Pro',
   proDisabled:!!(s.pro||s.proPending||!ready||!price),
-  tips:TIPS.map((id,i)=>({id,label:pending.includes(id)?'Tip pending':prices[id]?`${TIP_NAMES[i]} (${prices[id]})`:TIP_NAMES[i],disabled:!ready||!prices[id]||pending.includes(id)}))
+  tips:TIPS.map((id,i)=>({id,name:pending.includes(id)?'Tip pending':TIP_NAMES[i],price:pending.includes(id)||!prices[id]?'':prices[id],label:pending.includes(id)?'Tip pending':prices[id]?`${TIP_NAMES[i]} (${prices[id]})`:TIP_NAMES[i],disabled:!ready||!prices[id]||pending.includes(id)}))
  };
 }
 
@@ -45,11 +47,10 @@ function restoreMessage(state){
  return 'No purchases found on this Google account.';
 }
 
-const CSS='.billing-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 14px}.billing-bar button{flex:1 1 9rem;min-width:0;white-space:normal}.billing-bar button[disabled]{opacity:.6;cursor:default}.billing-status{margin:0 0 14px}.supporter-badge{font-size:12px;font-weight:700;color:var(--accent);border:1px solid currentColor;border-radius:30px;padding:3px 10px;white-space:nowrap}';
+const CSS='.billing-pro{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin:0 0 14px}.billing-pro #buyPro,.billing-tips button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:4.5rem;height:100%;white-space:normal;text-align:center;line-height:1.25}.billing-pro #buyPro{flex:1 1 12rem}.billing-pro #restorePurchases{flex:1 1 8rem}.billing-tips{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 10px}.billing-tips .quiet,.support-restore{width:100%;margin-top:10px}@media(min-width:640px){.billing-tips{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}}.buy-name,.buy-price{display:block}.buy-price{font-size:.85em;font-weight:650}.billing-pro button[disabled],.billing-tips button[disabled]{opacity:.6;cursor:default}.billing-status{margin:0 0 14px}.supporter-badge{font-size:12px;font-weight:700;color:var(--accent);border:1px solid currentColor;border-radius:30px;padding:3px 10px;white-space:nowrap}';
 
-function barHtml(){
- return '<button id="buyPro" type="button">Get Pro</button><button id="tip_small" type="button" class="secondary">Small tip</button><button id="tip_medium" type="button" class="secondary">A little extra</button><button id="tip_large" type="button" class="secondary">Big thanks</button><button id="restorePurchases" type="button" class="quiet">Restore purchases</button><span id="supporterBadge" class="supporter-badge" hidden>Supporter</span>';
-}
+function esc(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function face(name,price){return price?`<span class="buy-name">${esc(name)}</span><span class="buy-price">${esc(price)}</span>`:`<span class="buy-name">${esc(name)}</span>`;}
 
 function start(win){
  const doc=win&&win.document,native=win&&win.NativeBilling;
@@ -64,38 +65,41 @@ function start(win){
  if(profile){
   const step=profile.querySelector('.step');if(step)step.textContent='PRO · PAY ONCE';
   const disclosure=profile.querySelector('.pro-disclosure');if(disclosure)disclosure.textContent='Buy Pro once through Google Play. Your setups stay on this phone, with room for 20 labs and 100 devices per lab.';
-  doc.querySelectorAll('.pro-lock').forEach(el=>{el.textContent=profile.contains(el)?'Named labs, comparisons, CSV import, and a printable report come with Pro. The calculator itself stays free.':'This is part of Pro. Get Pro is up with your labs.';});
+  doc.querySelectorAll('.pro-lock').forEach(el=>{el.textContent=profile.contains(el)?'Named labs, comparisons, CSV import, and a printable report come with Pro.':'This is part of Pro. Get Pro is up with your labs.';});
  }
  const whatIf=doc.getElementById('whatIfLock');
- if(whatIf)whatIf.textContent='Trying a swap in a second build is part of Pro. Get Pro in Settings if you want to do that. The ranking stays visible either way, and this build is left as it is.';
+ if(whatIf)whatIf.textContent='Trying a swap in a second build is part of Pro. Get Pro is on the calculator if you want to do that. The ranking stays visible either way, and this build is left as it is.';
  const upsell=doc.getElementById('proUpsell');
- if(upsell)upsell.textContent='More than one saved build, your own parts, a side-by-side compare, and a PNG or CSV of the rack are part of Pro. Get Pro in Settings. The build you already have stays either way.';
+ if(upsell)upsell.textContent='More than one saved build, your own parts, a side-by-side compare, and a PNG or CSV of the rack are part of Pro. Get Pro is on the calculator. The build you already have stays either way.';
  const palette=doc.getElementById('paletteUpsell');
- if(palette&&support)palette.textContent='Nordic Server and Amber Terminal come with Pro. Get Pro in the section below if you want them. Until then the page stays on Homelab Green, and the pick is not forgotten.';
- const hosts=[];
- if(support){support.hidden=false;const mount=doc.getElementById('supportMount')||support;hosts.push(mount);}
- if(profile)hosts.push(profile);
- if(!hosts.length){wire(win,doc,native,E,null);return;}
- hosts.forEach(host=>{
-  if(host.querySelector('.billing-bar'))return;
-  const bar=doc.createElement('div');bar.className='billing-bar';bar.innerHTML=barHtml();
-  const status=doc.createElement('p');status.className='help billing-status';status.setAttribute('role','status');
-  if(!doc.getElementById('billingBar')){bar.id='billingBar';status.id='billingStatus';}
-  const heading=host.querySelector('.section-heading')||host.querySelector('h2');
-  if(heading&&host===profile)heading.after(bar,status);else host.append(bar,status);
- });
- wire(win,doc,native,E,true);
+ if(palette)palette.textContent='Nordic Server and Amber Terminal come with Pro. Get Pro is with your labs on the calculator. Until then the page stays on Homelab Green, and the pick is not forgotten.';
+ if(profile&&!profile.querySelector('.billing-pro')){
+  const bar=doc.createElement('div');bar.className='billing-pro';bar.id='billingBar';
+  bar.innerHTML='<button id="buyPro" type="button"><span class="buy-name">Get Pro</span></button><button id="restorePurchases" type="button" class="quiet">Restore purchases</button><span id="supporterBadge" class="supporter-badge" hidden>Supporter</span>';
+  const status=doc.createElement('p');status.id='billingStatus';status.className='help billing-status';status.setAttribute('role','status');
+  const heading=profile.querySelector('.section-heading');
+  if(heading)heading.after(bar,status);else profile.prepend(bar,status);
+ }
+ if(support&&!support.querySelector('.billing-tips')){
+  support.hidden=false;
+  const mount=doc.getElementById('supportMount')||support;
+  const grid=doc.createElement('div');grid.className='billing-tips';grid.id='billingTips';
+  grid.innerHTML=TIPS.map((id,i)=>`<button id="${id}" type="button" class="secondary"><span class="buy-name">${TIP_NAMES[i]}</span></button>`).join('');
+  const restore=doc.createElement('button');restore.id='restorePurchases';restore.type='button';restore.className='quiet support-restore';restore.textContent='Restore purchases';
+  mount.append(grid,restore);
+ }
+ wire(win,doc,native,E,!!(profile||support));
 }
 
 function wire(win,doc,native,E,hasBar){
  const $=id=>doc.getElementById(id);
  let current={status:'connecting'},busy=false;
- const toast=text=>{const A=win.PowerApp;if(A&&A.toast)A.toast(text);else{const status=$('billingStatus');if(status)status.textContent=text;}};
+ const toast=text=>{const A=win.PowerApp;if(A&&A.toast){A.toast(text);return;}const el=doc.getElementById('toast');if(el){el.textContent=text;el.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(()=>{el.style.display='none';},3000);return;}const status=$('billingStatus');if(status)status.textContent=text;};
  function paint(){
   if(!hasBar)return;
   const v=view(current);
-  doc.querySelectorAll('#buyPro').forEach(button=>{button.textContent=v.proLabel;button.disabled=busy||v.proDisabled;});
-  v.tips.forEach(t=>{doc.querySelectorAll('#'+t.id).forEach(button=>{button.textContent=t.label;button.disabled=busy||t.disabled;});});
+  doc.querySelectorAll('#buyPro').forEach(button=>{button.innerHTML=face(v.proName,v.proPrice);button.disabled=busy||v.proDisabled;});
+  v.tips.forEach(t=>{doc.querySelectorAll('#'+t.id).forEach(button=>{button.innerHTML=face(t.name,t.price);button.disabled=busy||t.disabled;});});
   doc.querySelectorAll('#restorePurchases').forEach(button=>{button.disabled=busy;});
   doc.querySelectorAll('#supporterBadge').forEach(badge=>{badge.hidden=!v.supporter;});
   const status=$('billingStatus');if(status)status.textContent=v.status;
