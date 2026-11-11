@@ -127,6 +127,9 @@ button.quiet{background:transparent;color:var(--muted)}
 .swatch.is-locked .swatch-lock{display:inline}
 .pro-badge{display:none;margin-left:8px;border:1px solid var(--line);border-radius:999px;padding:1px 7px;font-size:11px;font-weight:650;line-height:1.4;vertical-align:middle}
 .is-pro-locked .pro-badge{display:inline-block}
+input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden]):not(.sr-only),select,textarea{font-size:16px;min-height:48px}
+label.toggle{min-height:48px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 @media(max-width:700px){.swatch-grid{grid-template-columns:1fr}}
 #toast{left:16px;right:16px;bottom:calc(72px + env(safe-area-inset-bottom));transform:none;width:auto;max-width:28rem;margin:0 auto;padding:10px 14px;font-size:13px;line-height:1.35;text-align:left;cursor:pointer;z-index:40}
 @media(min-width:841px){#toast{bottom:24px}}

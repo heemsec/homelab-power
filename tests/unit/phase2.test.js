@@ -42,6 +42,12 @@ test('share link round-trips a build and drops markup', async () => {
   assert.equal(M.cleanPeriods(back.periods)[0].name, 'Peak');
 });
 
+test('a damaged or empty share link is refused', async () => {
+  await assert.rejects(() => Share.decode(''), /not a build/);
+  await assert.rejects(() => Share.decode('j.!!!'), /not a build/);
+  await assert.rejects(() => Share.decode('j.' + 'a'.repeat(20001)), /too long/);
+});
+
 test('a bad part id is rejected instead of trusted', () => {
   assert.throws(() => Share.sanitize({v: 1, n: 'x', w: 10, h: 8, i: [['<script>', 1, 'rack', '', '', '', '', 0]]}));
 });

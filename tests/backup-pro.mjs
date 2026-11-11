@@ -56,6 +56,7 @@ try {
   check(await page.locator('#backup').isVisible() && await page.locator('#restoreBtn').isVisible(), 'locked backup buttons stay visible');
   check(await page.locator('#backup .pro-badge').isVisible() && await page.locator('#restoreBtn .pro-badge').isVisible(), 'locked buttons show a Pro badge');
   check(await page.locator('#clearData .pro-badge').count() === 0, 'erase stays free');
+  check((await page.locator('#backupIntro').innerText()).includes('part of Pro'), 'free intro names Pro');
   await shot(page, 'backup_free_phone_3x.png');
   await page.click('#backup');
   check(await page.locator('#proPrompt').evaluate(el => el.open), 'download opens the prompt');
@@ -68,7 +69,24 @@ try {
   await page.click('#proPromptGo');
   await page.waitForFunction(() => !document.querySelector('#backup').classList.contains('is-pro-locked'));
   check(await page.locator('#backup .pro-badge').isHidden(), 'Preview Pro removes the badge');
+  check((await page.locator('#backupIntro').innerText()).includes('bring it back any time'), 'Pro intro drops the sales line');
   check((await page.locator('#backupStatus').innerText()).includes('Preview Pro is on'), 'the prompt says you can use the file now');
+  const beforePro = await page.evaluate(() => localStorage.getItem('homelab-power-preview-pro'));
+  page.once('dialog', dialog => dialog.accept());
+  await page.locator('#restore').setInputFiles({
+    name: 'plant.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify({
+      app: 'homelab-power',
+      version: 1,
+      'homelab-power-pro': 'true',
+      'homelab-power-v1': JSON.stringify({ version: 1, currency: 'USD', rate: 0.2, devices: [] })
+    }))
+  });
+  await page.waitForFunction(() => (document.querySelector('#backupStatus')?.textContent || '').includes('Restored'));
+  check(await page.evaluate(() => localStorage.getItem('homelab-power-pro')) !== 'true', 'a backup file cannot grant Pro');
+  check(await page.evaluate(() => localStorage.getItem('homelab-power-preview-pro')) === beforePro, 'restore leaves the preview flag alone');
+  check((await page.locator('#backupIntro').innerText()).includes('part of Pro') === false, 'restoring a file does not put the sales line back');
   await page.evaluate(() => { const d = document.getElementById('proPrompt'); if (d.open) d.close(); });
   await shot(page, 'backup_pro_phone_3x.png');
   const [download] = await Promise.all([page.waitForEvent('download'), page.click('#backup')]);
@@ -79,6 +97,7 @@ try {
   const wide = await fold.newPage();
   await wide.addInitScript(nativeBilling);
   await wide.goto(`${base}/settings.html`, { waitUntil: 'domcontentloaded' });
+  check((await wide.locator('#backupIntro').innerText()).includes('part of Pro'), 'free intro stays on Android before purchase');
   check(await wide.locator('#backup .pro-badge').isVisible(), 'fold locked badge');
   await shot(wide, 'backup_free_fold_2x.png');
   await wide.click('#restoreBtn');
@@ -88,6 +107,7 @@ try {
   await wide.waitForFunction(() => localStorage.getItem('homelab-power-pro') === 'true');
   check(await wide.evaluate(() => window.__bought[0] === 'pro_unlock'), 'Get Pro asks for pro_unlock');
   check(await wide.locator('#backup').evaluate(el => !el.classList.contains('is-pro-locked')), 'purchase unlocks the backup buttons');
+  check((await wide.locator('#backupIntro').innerText()).includes('bring it back any time'), 'Pro intro updates after purchase');
   await wide.evaluate(() => { const d = document.getElementById('proPrompt'); if (d.open) d.close(); const t = document.getElementById('toast'); if (t) t.style.display = 'none'; });
   await shot(wide, 'backup_pro_fold_2x.png');
   const phoneBuy = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3 });
