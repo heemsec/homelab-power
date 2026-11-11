@@ -117,7 +117,7 @@ try {
   const settings = await context.newPage();
   await settings.setViewportSize({ width: 390, height: 844 });
   await settings.goto(`${base}/settings.html`, { waitUntil: 'domcontentloaded' });
-  check((await settings.locator('#aboutVersion').innerText()) === '1.3.3', 'About reads the single version');
+  check((await settings.locator('#aboutVersion').innerText()) === '1.3.4', 'About reads the single version');
   check(await settings.locator('#backup .pro-badge').isVisible(), 'backup stays visible with a Pro badge');
   await settings.click('#backup');
   check(await settings.locator('#proPrompt').evaluate(el => el.open), 'a locked backup opens the Pro prompt');
