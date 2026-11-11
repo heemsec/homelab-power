@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Defaults, theme, and a backup of everything Homelab Power stores on this device.">
 <meta name="theme-color" content="#0b1215"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Homelab Power"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script src="theme.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="ui.css"><script src="version.js"></script><script defer src="pwa.js"></script><script defer src="settings.js"></script>
+<script src="theme.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="ui.css"><script src="version.js"></script><script src="entitlement.js"></script><script defer src="pwa.js"></script><script defer src="settings.js"></script>
 <title>Settings · Homelab Power</title>
 </head>
 <body>
@@ -34,6 +34,11 @@
 <label class="swatch"><input type="radio" name="palette" value="amber" data-pro="true"><span class="swatch-pair" aria-hidden="true"><span class="mini" style="--m-bg:#121212;--m-card:#282828;--m-ink:#F5F5F5;--m-accent:#F59E0B"></span><span class="mini" style="--m-bg:#FAFAF9;--m-card:#fff;--m-ink:#1C1917;--m-accent:#D97706"></span></span><span class="swatch-name">Amber Terminal <span class="swatch-lock">Locked</span></span><span class="swatch-note">Pro. Warm screen, orange actions.</span></label>
 </div>
 <p id="paletteUpsell" class="upsell" hidden>Nordic Server and Amber Terminal are Pro themes. Preview Pro on the planner or the calculator, or unlock them in the Android app, and the one you already picked comes back. Until then the page stays on Homelab Green, and the pick is not forgotten.</p>
+</section>
+<section class="card" id="supportCard" hidden aria-labelledby="supportTitle">
+<h2 id="supportTitle">Leave a tip</h2>
+<p class="help" id="supportNote">If the app has been useful, you can leave a tip. It doesn't unlock Pro or anything else, and you can send another later. Nothing comes back except a thank-you.</p>
+<div id="supportMount"></div>
 </section>
 <section class="card" aria-labelledby="backupTitle"><h2 id="backupTitle">Backup</h2>
 <p class="help">One JSON file with the lab, including time-of-use periods, plus builds, part corrections, your parts, and these settings. It stays on this device unless you move the file yourself.</p>

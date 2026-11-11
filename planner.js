@@ -440,7 +440,10 @@ function renderUps(build) {
     const typical = build.items.reduce((sum, other) => other.uid === it.uid ? sum : sum + oneWatts(other).typical * (other.qty || 1), 0);
     const ask = !p.runtimeCurve && !p.batteryWh && !p.batteryVAh;
     const input = ask ? `<label>Battery watt-hours for ${esc(labelOf(p, it))}<input data-battery="${esc(it.uid)}" type="text" inputmode="decimal" value="${it.batteryWh ?? ''}" aria-describedby="upsTitle"></label>` : '';
-    const source = [p.runtimeSource, p.batterySource].filter((url, i, all) => url && all.indexOf(url) === i).map(url => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Source</a>`).join(' ');
+    const sameSheet = p.runtimeSource && p.batterySource && p.runtimeSource === p.batterySource;
+    const source = sameSheet
+      ? `<a href="${esc(p.runtimeSource)}" target="_blank" rel="noopener noreferrer">Spec sheet</a>`
+      : [p.runtimeSource && `<a href="${esc(p.runtimeSource)}" target="_blank" rel="noopener noreferrer">Runtime sheet</a>`, p.batterySource && `<a href="${esc(p.batterySource)}" target="_blank" rel="noopener noreferrer">Battery sheet</a>`].filter(Boolean).join(' ');
     return `<article class="comparison-card"><h3>${esc(labelOf(p, it))}</h3>${runtimeSentence(p, it, idle, 'idle')}${runtimeSentence(p, it, typical, 'typical')}<p class="help">${esc(p.runtimeNote || '')} ${source}</p>${input}</article>`;
   }).join('') + (ups.length > 1 ? '<p class="help">Each UPS is checked against everything else in the build, as if it were carrying the whole load.</p>' : '');
 }
@@ -887,7 +890,7 @@ function wire() {
   $('buildSelect').addEventListener('change', () => { book.activeId = $('buildSelect').value; scheduleSave(); render(); });
   $('newBuild').addEventListener('click', () => {
     if (shared) return previewToast();
-    if (!pro() && book.builds.length >= 1) { $('proUpsell').hidden = false; toast('One saved build is free. Preview Pro if you want another.'); return; }
+    if (!pro() && book.builds.length >= 1) { $('proUpsell').hidden = false; toast(E.usesStore && E.usesStore() ? 'One saved build is free. Get Pro in Settings if you want another.' : 'One saved build is free. Preview Pro if you want another.'); return; }
     const b = emptyBuild('Another build');
     book.builds.push(b); book.activeId = b.id; scheduleSave(); render();
   });
@@ -908,6 +911,7 @@ function wire() {
     try { localStorage.setItem(PREVIEW, String(E.isPreview())); } catch {}
     renderPro(); renderBuilds(); renderWhatIf(shown());
   });
+  window.addEventListener('power:entitlement', () => { renderPro(); renderBuilds(); renderWhatIf(shown()); });
   $('compareA').addEventListener('change', renderCompare);
   $('compareB').addEventListener('change', renderCompare);
   $('exportCsv').addEventListener('click', exportCsv);
@@ -915,7 +919,7 @@ function wire() {
   $('customPartForm').addEventListener('submit', e => {
     e.preventDefault();
     if (shared) return previewToast();
-    if (!pro()) { toast('Your own parts are a Pro extra.'); return; }
+    if (!pro()) { toast(E.usesStore && E.usesStore() ? 'Your own parts are part of Pro. Get Pro in Settings if you want to add one.' : 'Your own parts are a Pro extra.'); return; }
     const where = $('customWhere').value;
     const part = {id: uid(), custom: true, brand: '', model: $('customName').value.trim().slice(0, 80) || 'Custom part', category: 'custom', formFactor: where === 'shelf' ? 'shelf' : '1U rack', rackUnits: where === 'shelf' ? 0 : num($('customU').value, 0.5, 20, 1), rackWidth: where === '19' ? 19 : 10, idleW: num($('customIdle').value, 0, 100000, 0), typicalW: num($('customTypical').value, 0, 100000, 0), maxW: null, confidence: 'estimate', source: '', notes: 'Added on this device.', popularity: 3};
     custom.push(part);

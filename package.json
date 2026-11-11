@@ -5,9 +5,10 @@
   "description": "A calculator for what a homelab costs to leave running. Add the gear, type a rate or start from a published average, and you get energy and cost for a day, a month, and a year. What-if cards cover downtime, stuffing several machines onto one host, and how long an upgrade takes to pay for itself.",
   "main": "app.js",
   "scripts": {
-    "test:unit": "node --test tests/unit/*.test.js",
-    "test:e2e": "node tests/phase1.mjs && node tests/phase2.mjs && node tests/phase4.mjs",
-    "test": "npm run test:unit && npm run test:e2e"
+    "test:unit": "node --test tests/unit/*.test.js && node tests/test-billing.js",
+    "test:e2e": "node tests/phase1.mjs && node tests/phase2.mjs && node tests/phase4.mjs && node tests/test-billing-browser.mjs",
+    "test": "npm run test:unit && npm run test:e2e",
+    "android:sync": "node sync-web.js"
   },
   "repository": {
     "type": "git",

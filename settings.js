@@ -5,7 +5,7 @@ const THEME = 'homelab-power-theme';
 const SAVE_PAUSE = 400;
 const $ = id => document.getElementById(id);
 const PALETTE = 'homelab-power-palette';
-const KNOWN = [KEY, 'homelab-power-v1', 'homelab-power-builds-v1', 'homelab-power-custom-parts-v1', 'homelab-power-corrections-v1', 'homelab-power-profiles-v1', THEME, PALETTE, 'homelab-power-preview-pro'];
+const KNOWN = [KEY, 'homelab-power-v1', 'homelab-power-builds-v1', 'homelab-power-custom-parts-v1', 'homelab-power-corrections-v1', 'homelab-power-profiles-v1', THEME, PALETTE, 'homelab-power-preview-pro', 'homelab-power-pro'];
 let saveTimer = 0;
 let ready = false;
 function num(v, lo, hi, fallback) {
@@ -56,8 +56,10 @@ function collect() {
   };
 }
 function hasPro() {
-  try { return localStorage.getItem('homelab-power-preview-pro') === 'true' || localStorage.getItem('homelab-power-pro') === 'true'; }
-  catch { return false; }
+  try {
+    if (window.NativeBilling) return localStorage.getItem('homelab-power-pro') === 'true';
+    return localStorage.getItem('homelab-power-preview-pro') === 'true' || localStorage.getItem('homelab-power-pro') === 'true';
+  } catch { return false; }
 }
 function paintLocks() {
   const pro = hasPro();
@@ -174,6 +176,8 @@ for (const radio of document.querySelectorAll('input[name="palette"]')) radio.ad
   schedule();
 });
 $('aboutVersion').textContent = window.HOMELAB_VERSION || '';
+window.addEventListener('power:pro', () => { paintLocks(); if (window.HomelabTheme) window.HomelabTheme.apply(); });
+window.addEventListener('power:entitlement', () => { paintLocks(); if (window.HomelabTheme) window.HomelabTheme.apply(); });
 $('backup').addEventListener('click', backup);
 $('restoreBtn').addEventListener('click', () => $('restore').click());
 $('restore').addEventListener('change', () => { const file = $('restore').files[0]; if (file) restore(file); $('restore').value = ''; });
