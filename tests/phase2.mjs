@@ -46,8 +46,21 @@ try {
   await page.click('[data-add="apc-back-ups-pro-br1500ms2"]');
   await page.waitForSelector('#upsCard:not([hidden])');
   const ups = await page.locator('#upsRuntime').innerText();
-  check(/longer than 150/.test(ups), `light load stays above the first published point (${ups.slice(0, 180)})`);
+  check(/More than 2 hours 30 minutes/.test(ups), `light load stays above the first published point (${ups.slice(0, 220)})`);
+  check(/18\.1 W load/.test(ups), 'UPS copy names the load');
+  check(!/on the other gear|longer than \d/.test(ups), 'UPS copy does not use the old runtime phrasing');
   check(/Source/.test(ups), 'UPS card links the source');
+  check(/Turn the 10\.1" monitor off when you're not using it/.test(await page.locator('#whatIfBody').innerText()), 'monitor suggestion uses a short name');
+  page.once('dialog', dialog => dialog.accept());
+  await page.selectOption('#presetSelect', 'classic-r730-synology-unifi');
+  await page.click('#loadPreset');
+  await page.waitForFunction(() => /tiny PC/.test(document.querySelector('#whatIfBody')?.textContent || ''));
+  const swapTitle = await page.locator('#whatIfBody h3').first().innerText();
+  check(/Move the Dell R730 onto a tiny PC/.test(swapTitle), `rack server swap uses a short name (${swapTitle})`);
+  await page.selectOption('#presetSelect', 'nicks-8u-minilab');
+  page.once('dialog', dialog => dialog.accept());
+  await page.click('#loadPreset');
+  await page.waitForFunction(() => /10\.1" monitor/.test(document.querySelector('#whatIfBody')?.textContent || ''));
 
   check(await page.locator('#whatIfLock').isVisible(), 'what-if swaps stay locked before Pro');
   await page.click('#previewPro');
