@@ -22,7 +22,7 @@ Prices on the buttons are the localized strings Play returns. The app does not i
 - Android, Settings: a **Leave a tip** section with the three tips and Restore. No Get Pro button, and it stays hidden on the web.
 - Android, planner: Preview Pro is hidden. The extras point at Get Pro in Settings. Buying still happens through the same plugin.
 
-Pro gating for labs, comparisons, import, the printable report, extra builds, custom parts, and the Nordic and Amber themes follows Play's answer inside the app. On the web, Preview Pro still opens those.
+Pro gating for labs, comparisons, CSV import, the printable report, extra builds, custom parts, backup files, and the Nordic and Amber themes follows Play's answer inside the app. On the web, Preview Pro still opens those. A backup file is the download and the restore. The lab already saved on the device, share links, and a CSV download stay available either way.
 
 ## What the plugin sends
 

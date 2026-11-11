@@ -65,12 +65,12 @@ function start(win){
  if(profile){
   const step=profile.querySelector('.step');if(step)step.textContent='PRO · PAY ONCE';
   const disclosure=profile.querySelector('.pro-disclosure');if(disclosure)disclosure.textContent='Buy Pro once through Google Play. Your setups stay on this phone, with room for 20 labs and 100 devices per lab.';
-  doc.querySelectorAll('.pro-lock').forEach(el=>{el.textContent=profile.contains(el)?'Named labs, comparisons, CSV import, and a printable report come with Pro.':'This is part of Pro. Get Pro is up with your labs.';});
+  doc.querySelectorAll('.pro-lock').forEach(el=>{el.textContent=profile.contains(el)?'Named labs, comparisons, CSV import, a printable report, and backup files come with Pro.':'This is part of Pro. Get Pro is up with your labs.';});
  }
  const whatIf=doc.getElementById('whatIfLock');
  if(whatIf)whatIf.textContent='Trying a swap in a second build is part of Pro. Get Pro is on the calculator if you want to do that. The ranking stays visible either way, and this build is left as it is.';
  const upsell=doc.getElementById('proUpsell');
- if(upsell)upsell.textContent='More than one saved build, your own parts, a side-by-side compare, and a PNG or CSV of the rack are part of Pro. Get Pro is on the calculator. The build you already have stays either way.';
+ if(upsell)upsell.textContent='More than one saved build, your own parts, a side-by-side compare, a PNG or CSV of the rack, and a backup file are part of Pro. Get Pro is on the calculator. The build you already have stays either way.';
  const palette=doc.getElementById('paletteUpsell');
  if(palette)palette.textContent='Nordic Server and Amber Terminal come with Pro. Get Pro is with your labs on the calculator. Until then the page stays on Homelab Green, and the pick is not forgotten.';
  if(profile&&!profile.querySelector('.billing-pro')){

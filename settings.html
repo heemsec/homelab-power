@@ -41,10 +41,20 @@
 <p id="paletteUpsell" class="upsell" hidden>Nordic Server and Amber Terminal are Pro themes. Preview Pro on the planner or the calculator, or unlock them in the Android app, and the one you already picked comes back. Until then the page stays on Homelab Green, and the pick is not forgotten.</p>
 </section>
 <section class="card" aria-labelledby="backupTitle"><h2 id="backupTitle">Backup</h2>
-<p class="help">One JSON file with the lab, including time-of-use periods, plus builds, part corrections, your parts, and these settings. It stays on this device unless you move the file yourself.</p>
-<div class="pro-actions"><button id="backup" type="button">Download backup</button><button id="restoreBtn" type="button" class="secondary">Restore a file</button><input id="restore" type="file" accept="application/json,.json" class="sr-only" aria-label="Backup file to restore"><button id="clearData" type="button" class="quiet">Erase everything on this device</button></div>
+<p class="help">The lab saves itself on this device as you go. A file you can download, or bring back later, is part of Pro.</p>
+<div class="pro-actions"><button id="backup" type="button">Download backup <span class="pro-badge">Pro</span></button><button id="restoreBtn" type="button" class="secondary">Restore a file <span class="pro-badge">Pro</span></button><input id="restore" type="file" accept="application/json,.json" class="sr-only" aria-label="Backup file to restore"><button id="clearData" type="button" class="quiet">Erase everything on this device</button></div>
 <p id="backupStatus" class="help" role="status"></p>
 </section>
+<dialog id="proPrompt" aria-labelledby="proPromptTitle">
+<form method="dialog" class="dialog-body">
+<h2 id="proPromptTitle">That's part of Pro</h2>
+<p id="proPromptText">Downloading a backup, or bringing a file back, is part of Pro. What's already saved on this device stays put.</p>
+<div class="pro-actions">
+<button id="proPromptGo" type="button">Get Pro</button>
+<button id="proPromptClose" type="button" class="quiet">Not now</button>
+</div>
+</form>
+</dialog>
 <section class="card" aria-labelledby="aboutTitle"><h2 id="aboutTitle">About</h2>
 <p>Version <span id="aboutVersion"></span></p>
 <p><a href="privacy.html">Privacy policy</a></p>
