@@ -27,7 +27,7 @@ button:hover{transform:translateY(-1px)}
 button:active{transform:translateY(1px);box-shadow:var(--shadow-press)}
 button.secondary,button.quiet{box-shadow:none}
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.total-card:last-child strong,.stat:nth-child(2) strong{color:var(--accent)}
+.total-card:last-child strong,.stat:nth-child(2) strong,.stat-money strong{color:var(--accent)}
 .load-ok strong{color:var(--load-ok)}
 .load-heavy{border-color:var(--load-heavy)}
 .load-heavy strong{color:var(--load-heavy)}

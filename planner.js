@@ -263,6 +263,10 @@ function renderTotals(build) {
   if (wide.length) bits.push('A 19 inch part won\'t sit in a 10 inch rack. It\'s listed with the shelf gear.');
   $('fitWarning').hidden = !bits.length;
   $('fitWarning').textContent = bits.join(' ');
+  const {rate, currency} = currentRate();
+  const year = M.energyCost(t.typical, rate).year;
+  $('yearTotal').textContent = money(year, currency);
+  $('yearTotal').dataset.cost = String(year);
   $('idleHeat').textContent = `${fmt(M.btuPerHour(t.idle), 1)} BTU/hr`;
   $('typicalHeat').textContent = `${fmt(M.btuPerHour(t.typical), 1)} BTU/hr`;
   $('idleHeat').dataset.btu = String(M.btuPerHour(t.idle));
@@ -389,29 +393,42 @@ function renderPro() {
   $('proTools').hidden = !on;
   if (on) renderCompare();
 }
+function runtimeWords(minutes) {
+  const total = Math.round(Number(minutes));
+  if (!Number.isFinite(total) || total < 0) return 'an unknown time';
+  if (total <= 90) return total === 1 ? '1 minute' : `${total} minutes`;
+  const hours = Math.floor(total / 60);
+  const mins = total % 60;
+  const hourText = hours === 1 ? '1 hour' : `${hours} hours`;
+  if (!mins) return hourText;
+  const minText = mins === 1 ? '1 minute' : `${mins} minutes`;
+  return `${hourText} ${minText}`;
+}
 function minutesPhrase(hit) {
-  if (!hit) return 'no published point';
-  if (hit.bound === 'longer') return `longer than ${fmt(hit.minutes, 1)} minutes on a new battery`;
-  if (hit.bound === 'shorter') return `shorter than ${fmt(hit.minutes, 1)} minutes on a new battery`;
-  return `${fmt(hit.minutes * 0.6, 1)} to ${fmt(hit.minutes, 1)} minutes`;
+  if (!hit) return 'no published runtime';
+  const words = runtimeWords(hit.minutes);
+  if (hit.bound === 'longer') return `More than ${words} on a new battery`;
+  if (hit.bound === 'shorter') return `Less than ${words} on a new battery`;
+  return `${runtimeWords(hit.minutes * 0.6)} to ${words} on a new battery`;
 }
 function runtimeSentence(part, item, load, label) {
   const rated = Number(part.ratedW);
   const over = Number.isFinite(rated) && rated > 0 && load > rated + 1e-6;
   const name = label === 'idle' ? 'Idle' : 'Typical';
-  if (over) return `<p class="circuit-warning load-over"><strong>Over the rating.</strong> ${name} load elsewhere is ${wattsText(load)}, and this UPS is rated ${wattsText(rated)}.</p>`;
+  const loadText = wattsText(load);
+  if (over) return `<p class="circuit-warning load-over"><strong>Over the rating.</strong> The ${name.toLowerCase()} load is ${loadText}, and this UPS is rated ${wattsText(rated)}.</p>`;
   if (Array.isArray(part.runtimeCurve) && part.runtimeCurve.length) {
     const hit = M.interpolateRuntime(part.runtimeCurve, load);
-    return `<p>${name}: ${minutesPhrase(hit)} at ${wattsText(load)} on the other gear. The top of the range is the published curve. The low end is 60% of that, for an older battery.</p>`;
+    return `<p>${name}: ${minutesPhrase(hit)} (${loadText} load). The top of the range is the published curve. The low end is 60% of that, for an older battery.</p>`;
   }
   const wh = item.batteryWh || part.batteryWh || part.batteryVAh;
   if (wh && load > 0) {
     const est = M.runtimeFromEnergy(wh, load);
     const energy = part.batteryVAh && !part.batteryWh && !item.batteryWh ? `${fmt(part.batteryVAh, 0)} VAh from the datasheet, used here as energy` : `${fmt(wh, 1)} Wh`;
-    return `<p>${name}: about ${fmt(est.low, 0)} to ${fmt(est.high, 0)} minutes, with ${fmt(est.mid, 0)} in the middle, at ${wattsText(load)}. That uses ${energy}, 85% efficiency, and 80% of the pack. The edges of the range are 80% / 70% and 90% / 90%.</p>`;
+    return `<p>${name}: about ${runtimeWords(est.low)} to ${runtimeWords(est.high)}, with ${runtimeWords(est.mid)} in the middle (${loadText} load). That uses ${energy}, 85% efficiency, and 80% of the pack. The edges of the range are 80% / 70% and 90% / 90%.</p>`;
   }
   if (!(load > 0)) return `<p>${name}: nothing else in the build is drawing power, so runtime isn't the limiting question.</p>`;
-  return `<p>${name} load elsewhere is ${wattsText(load)}. No published battery size is stored for this model.</p>`;
+  return `<p>The ${name.toLowerCase()} load is ${loadText}. No published battery size is stored for this model.</p>`;
 }
 function renderUps(build) {
   const ups = (build.items || []).filter(it => partById(it.partId)?.category === 'ups');
@@ -426,6 +443,33 @@ function renderUps(build) {
     const source = [p.runtimeSource, p.batterySource].filter((url, i, all) => url && all.indexOf(url) === i).map(url => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Source</a>`).join(' ');
     return `<article class="comparison-card"><h3>${esc(labelOf(p, it))}</h3>${runtimeSentence(p, it, idle, 'idle')}${runtimeSentence(p, it, typical, 'typical')}<p class="help">${esc(p.runtimeNote || '')} ${source}</p>${input}</article>`;
   }).join('') + (ups.length > 1 ? '<p class="help">Each UPS is checked against everything else in the build, as if it were carrying the whole load.</p>' : '');
+}
+function ideaName(part) {
+  if (!part) return 'that part';
+  const model = String(part.model || '');
+  if (part.category === 'monitor') {
+    const size = model.match(/(\d+(?:\.\d+)?)\s*(?:"|″|inch)/i);
+    return size ? `${size[1]}" monitor` : 'monitor';
+  }
+  if (part.category === 'rack-server') {
+    const token = model.replace(/PowerEdge\s+/i, '').replace(/ProLiant\s+/i, '').replace(/\s*\([^)]*\)/g, '').trim().split(/\s+/)[0];
+    const brand = String(part.brand || '').split('/')[0].trim();
+    return brand && token ? `${brand} ${token}` : (token || 'rack server');
+  }
+  if (part.category === 'drive') {
+    const size = model.match(/(\d+(?:\.\d+)?)\s*(TB|GB)/i);
+    const ssd = /ssd/i.test(`${model} ${part.formFactor || ''}`);
+    return size ? `${size[1]} ${size[2].toUpperCase()} ${ssd ? 'SSD' : 'HDD'}` : (ssd ? 'SSD' : 'HDD');
+  }
+  if (part.category === 'mini-pc') {
+    const hit = model.match(/\b(M\d{2,3}[a-z]?(?:\s+Gen\s*\d+)?|MS-\d+|OptiPlex\s+\d+|EliteDesk\s+\d+\s+G\d+)\b/i);
+    if (hit) return hit[1].replace(/\s+/g, ' ');
+  }
+  const brand = String(part.brand || '').split('/')[0].trim();
+  const shortModel = model.replace(/\s*\([^)]*\)/g, '').split(',')[0].trim();
+  if (!brand || brand === 'Generic') return shortModel || 'that part';
+  const both = `${brand} ${shortModel}`.replace(/\s+/g, ' ').trim();
+  return both.length > 42 ? shortModel : both;
 }
 function catalogChoice(category, skipId, score) {
   return allParts().filter(p => p.category === category && p.id !== skipId && Number.isFinite(+p.typicalW)).sort((a, b) => score(a) - score(b))[0] || null;
@@ -443,14 +487,14 @@ function renderWhatIf(build) {
   for (const row of rows) {
     if (row.p.category === 'rack-server' && row.watts >= 80) {
       const mini = catalogChoice('mini-pc', row.p.id, p => p.typicalW);
-      if (mini && mini.typicalW < row.watts) ideas.push({key: `server:${row.it.uid}`, title: `Move ${labelOf(row.p)} onto a tiny PC`, note: 'Only if that job actually fits on a tiny PC. This is the watt gap, not a promise about the processor.', from: row.watts, to: mini.typicalW, apply: copy => { const hit = copy.items.find(it => it.uid === row.it.uid); if (hit) { hit.partId = mini.id; hit.qty = 1; hit.idleOverride = null; hit.typicalOverride = null; } }});
+      if (mini && mini.typicalW < row.watts) ideas.push({key: `server:${row.it.uid}`, title: `Move the ${ideaName(row.p)} onto a tiny PC`, note: 'Only if that job actually fits on a tiny PC. This is the watt gap, not a promise about the processor.', from: row.watts, to: mini.typicalW, apply: copy => { const hit = copy.items.find(it => it.uid === row.it.uid); if (hit) { hit.partId = mini.id; hit.qty = 1; hit.idleOverride = null; hit.typicalOverride = null; } }});
     }
     if (row.p.category === 'switch' && row.watts >= 20) {
       const modern = catalogChoice('switch', row.p.id, p => p.typicalW);
-      if (modern && modern.typicalW < row.watts) ideas.push({key: `switch:${row.it.uid}`, title: `Try ${labelOf(modern)} instead of ${labelOf(row.p)}`, note: 'Port count and PoE may not match. Check that before you buy one.', from: row.watts, to: modern.typicalW, apply: copy => { const hit = copy.items.find(it => it.uid === row.it.uid); if (hit) { hit.partId = modern.id; hit.qty = 1; hit.idleOverride = null; hit.typicalOverride = null; } }});
+      if (modern && modern.typicalW < row.watts) ideas.push({key: `switch:${row.it.uid}`, title: `Try a ${ideaName(modern)} instead of the ${ideaName(row.p)}`, note: 'Port count and PoE may not match. Check that before you buy one.', from: row.watts, to: modern.typicalW, apply: copy => { const hit = copy.items.find(it => it.uid === row.it.uid); if (hit) { hit.partId = modern.id; hit.qty = 1; hit.idleOverride = null; hit.typicalOverride = null; } }});
     }
     if (row.p.category === 'monitor' && row.watts >= 3) {
-      ideas.push({key: `sleep:${row.it.uid}`, title: `Count ${labelOf(row.p)} as off`, note: 'This counts the screen as off. It is not a measured sleep watt.', from: row.watts, to: 0, apply: copy => { const hit = copy.items.find(it => it.uid === row.it.uid); if (hit) { hit.idleOverride = 0; hit.typicalOverride = 0; } }});
+      ideas.push({key: `sleep:${row.it.uid}`, title: `Turn the ${ideaName(row.p)} off when you're not using it`, note: 'The screen is counted as off. That is not a measured sleep watt.', from: row.watts, to: 0, apply: copy => { const hit = copy.items.find(it => it.uid === row.it.uid); if (hit) { hit.idleOverride = 0; hit.typicalOverride = 0; } }});
     }
   }
   const drives = rows.filter(row => row.p.category === 'drive' && row.watts >= 2);
@@ -459,7 +503,11 @@ function renderWhatIf(build) {
     if (ssd && ssd.typicalW < 1) {
       const pair = drives.slice(0, 2);
       const from = pair.reduce((sum, row) => sum + row.watts, 0);
-      ideas.push({key: 'drives', title: `Replace ${labelOf(pair[0].p)} and ${labelOf(pair[1].p)} with ${labelOf(ssd)}`, note: 'Only if the data fits on that one drive.', from, to: ssd.typicalW, apply: copy => { const drop = new Set(pair.map(row => row.it.uid)); copy.items = copy.items.filter(it => !drop.has(it.uid)); copy.items.push({uid: uid(), partId: ssd.id, qty: 1, placement: 'shelf', startU: null, idleOverride: null, typicalOverride: null}); }});
+      const left = ideaName(pair[0].p);
+      const right = ideaName(pair[1].p);
+      const disk = ideaName(ssd);
+      const title = left === right ? `Replace two ${left}s with one ${disk}` : `Replace the ${left} and the ${right} with one ${disk}`;
+      ideas.push({key: 'drives', title, note: 'Only if the data fits on that one drive.', from, to: ssd.typicalW, apply: copy => { const drop = new Set(pair.map(row => row.it.uid)); copy.items = copy.items.filter(it => !drop.has(it.uid)); copy.items.push({uid: uid(), partId: ssd.id, qty: 1, placement: 'shelf', startU: null, idleOverride: null, typicalOverride: null}); }});
     }
   }
   const rank = rows.slice(0, 5).map(row => `<li>${esc(labelOf(row.p))} · ${wattsText(row.watts)} · ${money(row.year, currency)} a year</li>`).join('');
