@@ -79,6 +79,10 @@ function paintLocks() {
   $('paletteUpsell').hidden = !held;
   const go = $('proPromptGo');
   if (go) go.textContent = storeMode() ? 'Get Pro' : 'Turn on Preview Pro';
+  const intro = $('backupIntro');
+  if (intro) intro.textContent = pro
+    ? 'The lab saves itself on this device as you go. You can also download a backup file and bring it back any time.'
+    : 'The lab saves itself on this device as you go. A file you can download, or bring back later, is part of Pro.';
 }
 function storeMode() {
   return !!(window.NativeBilling || (window.PowerEntitlement && window.PowerEntitlement.usesStore && window.PowerEntitlement.usesStore()));
@@ -155,8 +159,10 @@ function backup() {
   download('homelab-power-backup.json', JSON.stringify(dump, null, 2));
   $('backupStatus').textContent = 'Backup downloaded. It only leaves this device if you send the file somewhere.';
 }
+const ENTITLEMENT_KEYS = new Set(['homelab-power-pro', 'homelab-power-preview-pro']);
 function validate(data) {
-  if (!data || data.app !== 'homelab-power' || data.version !== 1) return 'This file isn\'t a Homelab Power backup.';
+  if (!data || data.app !== 'homelab-power' || typeof data !== 'object') return 'This file isn\'t a Homelab Power backup.';
+  if (data.version !== 1) return Number(data.version) > 1 ? 'This backup is from a newer copy of the app. This version can\'t open it.' : 'This backup is from an older copy of the app. This version can\'t open it.';
   for (const key of KNOWN) {
     if (data[key] == null) continue;
     if (typeof data[key] !== 'string') return 'That backup looks damaged.';
@@ -175,6 +181,7 @@ async function restore(file) {
   if (problem) { $('backupStatus').textContent = problem; return; }
   if (!confirm('Replace the lab, builds, and settings on this device with this file?')) return;
   for (const key of KNOWN) {
+    if (ENTITLEMENT_KEYS.has(key)) continue;
     if (data[key] == null) localStorage.removeItem(key);
     else localStorage.setItem(key, data[key]);
   }

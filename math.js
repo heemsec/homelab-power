@@ -2,8 +2,20 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.PowerMath=factory();})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
 const MONTH_DAYS=365/12;
-// Accept a decimal comma, but never guess at mixed decimal/thousands separators.
-const parse=v=>typeof v==='number'?v:Number(String(v??'').trim().replace(',', '.'));
+// A lone comma is a decimal comma (12,5). If both comma and dot appear, the later one is the decimal mark.
+function parse(v){
+ if(typeof v==='number')return v;
+ let s=String(v??'').trim().replace(/\s/g,'');
+ if(!s)return NaN;
+ const comma=s.lastIndexOf(','), dot=s.lastIndexOf('.');
+ if(comma!==-1&&dot!==-1)s=comma>dot?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');
+ else if(comma!==-1){
+  const bits=s.split(',');
+  s=bits.length>2?s.replace(/,/g,''):s.replace(',','.');
+ }
+ const n=Number(s);
+ return n;
+}
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,parse(v)||0));
 function inWindow(t,start,hours){return hours>=24 || (hours>0 && ((t-start+24)%24)<hours);}
 function windowHours(start,end){return (end-start+24)%24;}
@@ -54,10 +66,10 @@ function integrate(devices,s,options={}){
 function payback(price,dailySavings){return dailySavings>0?price/(dailySavings*MONTH_DAYS):null;}
 // Continuous draw. Month length matches the calculator: 365/12.
 function energyCost(watts, rate){
- const w=Number(watts)||0, r=Number(rate)||0, kwhDay=w*24/1000;
+ const w=Math.max(0,Number(watts)||0), r=Math.max(0,Number(rate)||0), kwhDay=w*24/1000;
  return {kwhDay, kwhMonth:kwhDay*MONTH_DAYS, kwhYear:kwhDay*365, month:kwhDay*MONTH_DAYS*r, year:kwhDay*365*r};
 }
-function btuPerHour(watts){return (Number(watts)||0)*3.412;}
+function btuPerHour(watts){return Math.max(0,Number(watts)||0)*3.412;}
 function yearlySavings(fromWatts,toWatts,rate){
  const delta=energyCost(fromWatts,rate).year-energyCost(toWatts,rate).year;
  return {year:delta,month:delta/12};
