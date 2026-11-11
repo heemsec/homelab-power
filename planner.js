@@ -290,9 +290,14 @@ function wattFields(it) {
   return `<label>Idle W<input data-uid="${it.uid}" data-field="idle" type="text" inputmode="decimal" value="${idleValue}" aria-label="Idle watts override"></label>
     <label>Typical W<input data-uid="${it.uid}" data-field="typical" type="text" inputmode="decimal" value="${typicalValue}" aria-label="Typical watts override"></label>`;
 }
+function rowHeight() {
+  const raw = getComputedStyle($('rackVisual')).getPropertyValue('--rack-row');
+  const n = parseFloat(raw);
+  return Number.isFinite(n) && n > 0 ? n : 28;
+}
 function renderRack(build) {
   const step = stepOf(build.width);
-  const rowH = matchMedia('(max-width: 800px)').matches ? 48 : 30;
+  const rowH = rowHeight();
   const rows = Math.max(1, Math.round(build.heightU / step));
   const heightPx = rows * rowH;
   const slots = [];
