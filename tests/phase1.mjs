@@ -117,7 +117,7 @@ try {
   const settings = await context.newPage();
   await settings.setViewportSize({ width: 390, height: 844 });
   await settings.goto(`${base}/settings.html`, { waitUntil: 'domcontentloaded' });
-  check((await settings.locator('#aboutVersion').innerText()) === '1.3.0', 'About reads the single version');
+  check((await settings.locator('#aboutVersion').innerText()) === '1.3.1', 'About reads the single version');
   const [download] = await Promise.all([
     settings.waitForEvent('download'),
     settings.click('#backup')

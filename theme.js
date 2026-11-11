@@ -15,6 +15,7 @@
   if (!['light', 'dark'].includes(mode)) mode = null;
   function entitled() {
     try {
+      if (window.NativeBilling) return localStorage.getItem('homelab-power-pro') === 'true';
       return localStorage.getItem('homelab-power-preview-pro') === 'true' || localStorage.getItem('homelab-power-pro') === 'true';
     } catch { return false; }
   }

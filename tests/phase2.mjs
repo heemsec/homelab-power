@@ -49,7 +49,8 @@ try {
   check(/More than 2 hours 30 minutes/.test(ups), `light load stays above the first published point (${ups.slice(0, 220)})`);
   check(/18\.1 W load/.test(ups), 'UPS copy names the load');
   check(!/on the other gear|longer than \d/.test(ups), 'UPS copy does not use the old runtime phrasing');
-  check(/Source/.test(ups), 'UPS card links the source');
+  check(/Runtime sheet/.test(ups) && /Battery sheet/.test(ups), 'UPS card names the runtime sheet and the battery sheet');
+  check(!/Source Source/.test(ups), 'UPS card does not repeat a generic Source label');
   check(/Turn the 10\.1" monitor off when you're not using it/.test(await page.locator('#whatIfBody').innerText()), 'monitor suggestion uses a short name');
   page.once('dialog', dialog => dialog.accept());
   await page.selectOption('#presetSelect', 'classic-r730-synology-unifi');

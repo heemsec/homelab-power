@@ -22,7 +22,7 @@ window.addEventListener('pagehide',flushBook);
 function ensureBook(){if(!book){book=P.createBook(A.getState());saveBook();}}
 // The legacy active-state key remains a compatibility mirror and share-link target.
 if(book){if(A.getStateOrigin()==='demo'){A.replaceState(P.active(book).state);A.toast('Brought back the lab you had saved.');}else P.active(book).state=A.getState();}else if(pro())ensureBook();
-function guard(){if(pro())return true;A.toast('Pro isn\'t for sale yet. Turn on the preview if you want to poke at it.');return false;}
+function guard(){if(pro())return true;if(E.usesStore&&E.usesStore()){A.toast('That’s part of Pro. Get Pro is with your labs.');return false;}A.toast('Pro isn\'t for sale yet. Turn on the preview if you want to poke at it.');return false;}
 function showMessage(text){$('profileMessage').textContent=text;}
 function renderProfiles(){if(!book)return;$('profileSelect').innerHTML=book.profiles.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');$('profileSelect').value=book.activeId;$('profileName').value=P.active(book).name;}
 function gate(){const enabled=pro();$('previewPro').checked=E.isPreview();document.querySelectorAll('.pro-content').forEach(el=>el.hidden=!enabled);document.querySelectorAll('.pro-lock').forEach(el=>el.hidden=enabled);document.body.classList.toggle('pro-enabled',enabled);if(enabled){ensureBook();renderProfiles();renderCompare();}else{reportOpen=false;$('printReport').hidden=true;document.body.classList.remove('report-authorized');}renderSchedules();if(profileError)showMessage(profileError);window.dispatchEvent(new Event('power:pro'));}
@@ -52,5 +52,6 @@ $('showReport').addEventListener('click',()=>{if(openReport())$('printReport').s
 $('printReportButton').addEventListener('click',async()=>{if(!openReport())return;try{if(window.NativePrintReport)await window.NativePrintReport();else window.print();}catch{A.toast('Print didn\'t go through. The report is still on the page if you want to try again.');}});
 window.addEventListener('beforeprint',renderReport);
 window.addEventListener('power:change',()=>{if(book){P.active(book).state=A.getState();scheduleBook();}renderSchedules();if(pro()){renderCompare();renderReport();}});
+window.addEventListener('power:entitlement',gate);
 gate();if(book)saveBook();
 })();

@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Defaults, theme, and a backup of everything Homelab Power stores on this device.">
 <meta name="theme-color" content="#0b1215"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Homelab Power"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script src="theme.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="ui.css"><script src="version.js"></script><script defer src="pwa.js"></script><script defer src="settings.js"></script>
+<script src="theme.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="ui.css"><script src="version.js"></script><script src="entitlement.js"></script><script defer src="pwa.js"></script><script defer src="settings.js"></script>
 <title>Settings · Homelab Power</title>
 </head>
 <body>
@@ -14,6 +14,11 @@
 <p class="eyebrow">SETTINGS</p>
 <h1>Defaults for the next lab</h1>
 <p class="help">A lab you've already saved keeps its own rate until you change it on the calculator. A new one starts here. <span id="saveStatus" role="status">Saved on this device.</span></p>
+<section class="card" id="supportCard" hidden aria-labelledby="supportTitle">
+<h2 id="supportTitle">Leave a tip</h2>
+<p class="help" id="supportNote">Enjoying the app? You can leave a tip any time. It doesn't unlock anything, it just helps me keep building.</p>
+<div id="supportMount"></div>
+</section>
 <section class="card" aria-labelledby="defaultsTitle"><h2 id="defaultsTitle">Rate, numbers, look</h2>
 <div class="settings-grid">
 <label>Currency<select id="currency"><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option><option value="GBP">GBP (£)</option><option value="CAD">CAD ($)</option><option value="AUD">AUD ($)</option><option value="JPY">JPY (¥)</option><option value="INR">INR (₹)</option></select></label>
@@ -46,5 +51,6 @@
 <p><a href="https://github.com/heemsec/homelab-power">Source on GitHub</a></p>
 </section>
 </main>
+<div id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>
