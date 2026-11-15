@@ -978,10 +978,9 @@ function wire() {
     const raw = event.target;
     return raw instanceof Element ? raw : raw?.parentElement || null;
   };
-  // A tap can deliver pointerup and a second click after the list is rebuilt. The second one was putting a part straight back in the rack.
-  let fromPointer = false;
-  let actedUid = '';
-  let actedAt = 0;
+  // pointerup does the move. The click that follows can land on a button the rebuild just created, which was putting the part straight back. A later tap is a new pointerdown, so it still counts.
+  let pointerAct = null;
+  let pointerHandled = false;
   function keepPlace(uid) {
     const y = window.scrollY;
     const card = uid ? document.querySelector(`.shelf-item [data-uid="${CSS.escape(uid)}"]`)?.closest('.shelf-item') : null;
@@ -996,10 +995,6 @@ function wire() {
   }
   function runItemAct(act) {
     const id = act.dataset.uid;
-    const now = performance.now();
-    if (id && id === actedUid && now - actedAt < 450) return;
-    actedUid = id || '';
-    actedAt = now;
     const item = findItem(id);
     if (!item) return;
     const kind = act.dataset.act;
@@ -1022,16 +1017,24 @@ function wire() {
     restore();
     requestAnimationFrame(restore);
   }
-  document.body.addEventListener('pointerdown', () => { fromPointer = false; });
+  document.body.addEventListener('pointerdown', e => {
+    if (e.button != null && e.button !== 0) { pointerAct = null; pointerHandled = false; return; }
+    pointerAct = eventEl(e)?.closest('[data-act]') || null;
+    pointerHandled = false;
+  });
   document.body.addEventListener('pointerup', e => {
     if (e.button != null && e.button !== 0) return;
     const act = eventEl(e)?.closest('[data-act]');
-    if (!act || drag?.active) return;
-    fromPointer = true;
+    if (!act || act !== pointerAct || drag?.active) return;
+    pointerHandled = true;
     if (shared) return previewToast();
     runItemAct(act);
   });
   document.body.addEventListener('click', e => {
+    const down = pointerAct;
+    const handled = pointerHandled;
+    pointerAct = null;
+    pointerHandled = false;
     const el = eventEl(e);
     if (!el) return;
     const swap = el.closest('[data-swap]');
@@ -1043,7 +1046,8 @@ function wire() {
     if (add) { addPart(add.dataset.add, add.dataset.where); return; }
     const act = el.closest('[data-act]');
     if (!act) return;
-    if (fromPointer) { fromPointer = false; return; }
+    if (down && act !== down) return;
+    if (handled) return;
     runItemAct(act);
   });
   document.body.addEventListener('input', e => {
