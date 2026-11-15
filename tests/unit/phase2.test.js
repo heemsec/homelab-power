@@ -18,7 +18,7 @@ const cpCurve = [
 
 test('share link round-trips a build and drops markup', async () => {
   const build = {
-    name: 'Nick <lab>',
+    name: 'Home <lab>',
     width: 10,
     heightU: 8,
     rate: 0.42,
@@ -29,7 +29,7 @@ test('share link round-trips a build and drops markup', async () => {
   const token = await Share.encode(build);
   assert.match(token, /^[jz]\./);
   const back = await Share.decode(token);
-  assert.equal(back.name, 'Nick lab');
+  assert.equal(back.name, 'Home lab');
   assert.equal(back.width, 10);
   assert.equal(back.heightU, 8);
   assert.equal(back.rate, 0.42);
@@ -40,6 +40,23 @@ test('share link round-trips a build and drops markup', async () => {
   assert.equal(back.items[0].ownSlot, true);
   assert.equal(back.periods[0].price, 0.4);
   assert.equal(M.cleanPeriods(back.periods)[0].name, 'Peak');
+});
+
+test('the old minilab name is renamed, and a name someone typed stays', async () => {
+  const variants = [
+    'Nick\'s 8U 10" minilab',
+    'Nick\u2019s 8U 10" minilab',
+    'Nick\'s 8U 10\u2033 minilab',
+    'Nick\'s 8U 10\u201D minilab'
+  ];
+  for (const name of variants) {
+    const back = await Share.decode(await Share.encode({name, width: 10, heightU: 8, items: []}));
+    assert.equal(back.name, '8U 10" minilab', name);
+  }
+  const custom = await Share.decode(await Share.encode({name: 'Office rack', width: 10, heightU: 8, items: []}));
+  assert.equal(custom.name, 'Office rack');
+  assert.equal(Share.migrateMinilabName('Nick\'s 8U 10" minilab', 'classic-r730-synology-unifi'), 'Nick\'s 8U 10" minilab');
+  assert.equal(Share.migrateMinilabName('Office lab', 'nicks-8u-minilab'), 'Office lab');
 });
 
 test('a damaged or empty share link is refused', async () => {

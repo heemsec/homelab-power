@@ -1,5 +1,13 @@
 # Homelab Power
 
+## What's new in 1.3.9
+
+You can send the calculator lab or a planner build to Homelab Notebook. A lab that comes back the other way can be looked at, or saved as your lab, without Pro. Merging it into a lab you already have is part of Pro.
+
+## What's new in 1.3.8
+
+A build saved under the old 8U minilab name picks up the current name the next time the planner opens. A name you typed yourself stays as it is.
+
 ## What's new in 1.3.7
 
 The long pages are split into short tabs. The calculator is Devices and Costs, with ways to save at the bottom of Costs. The planner is the rack, the parts, and the bill. The home page has a short banner that says what the app is for.
