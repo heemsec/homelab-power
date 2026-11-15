@@ -1,5 +1,9 @@
 # Homelab Power
 
+## What's new in 1.3.9
+
+You can send the calculator lab or a planner build to Homelab Notebook. A lab that comes back the other way can be looked at, or saved as your lab, without Pro. Merging it into a lab you already have is part of Pro.
+
 ## What's new in 1.3.8
 
 A build saved under the old 8U minilab name picks up the current name the next time the planner opens. A name you typed yourself stays as it is.

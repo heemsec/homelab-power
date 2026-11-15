@@ -159,5 +159,9 @@ input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden])
 label.toggle{min-height:48px}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 @media(max-width:700px){.swatch-grid{grid-template-columns:1fr}}
+.notebook-actions{flex-direction:column;align-items:stretch}
+.notebook-actions button{width:100%;text-align:left}
+#notebookImport ul{margin:8px 0 0;padding-left:18px}
+#notebookBanner{margin:0 0 12px}
 #toast{left:16px;right:16px;bottom:calc(72px + env(safe-area-inset-bottom));transform:none;width:auto;max-width:28rem;margin:0 auto;padding:10px 14px;font-size:13px;line-height:1.35;text-align:left;cursor:pointer;z-index:40}
 @media(min-width:841px){#toast{bottom:24px}}

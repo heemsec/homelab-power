@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "notes": "Shared tokens for Homelab Power ↔ Homelab Notebook. Encoding is documented in INTEROP.md. #s= uses Power's current raw base64url JSON (no j./z. prefix). #p= and #n= use j. or z. plus base64url.",
+  "limits": {
+    "maxHashChars": 100000,
+    "maxDevices": 100,
+    "maxNotebookHosts": 200
+  },
+  "gating": {
+    "sendFree": true,
+    "openReadonlyFree": true,
+    "loadAsFirstLabFree": true,
+    "mergeIntoExistingLabPro": true,
+    "resyncLinkedHostsPro": true,
+    "proNotCrossRequired": true
+  },
+  "powerCalculatorState": {
+    "version": 1,
+    "region": null,
+    "currency": "USD",
+    "rate": 0.2,
+    "tou": false,
+    "offRate": 0.15,
+    "peakRate": 0.35,
+    "peakStart": 16,
+    "peakEnd": 21,
+    "offStart": 0,
+    "offEnd": 7,
+    "periods": [],
+    "consolidateWatts": 55,
+    "replacementWatts": 25,
+    "price": 350,
+    "voltageMode": "120",
+    "voltage": 120,
+    "breaker": 15,
+    "devices": [
+      {
+        "id": "host-pve1",
+        "name": "pve1",
+        "idle": 8,
+        "load": 35,
+        "loadPct": 20,
+        "hours": 24,
+        "start": 0,
+        "selected": true
+      },
+      {
+        "id": "host-pi",
+        "name": "pi-dns",
+        "idle": 3,
+        "load": 8,
+        "loadPct": 0,
+        "hours": 0,
+        "start": 0,
+        "selected": true
+      }
+    ]
+  },
+  "interopPayload": {
+    "v": 1,
+    "source": "homelab-notebook",
+    "name": "Interop sample",
+    "voltageMode": "120",
+    "voltage": 120,
+    "breaker": 15,
+    "devices": [
+      {
+        "id": "host-pve1",
+        "name": "pve1",
+        "type": "proxmox-node",
+        "partId": "beelink-eq12-n100",
+        "idleW": 8,
+        "typicalW": 35,
+        "qty": 1,
+        "ip": "192.168.1.10",
+        "mac": "bc:24:11:00:00:0a"
+      },
+      {
+        "id": "host-pi",
+        "name": "pi-dns",
+        "type": "pi",
+        "partId": "raspberry-pi-raspberry-pi-5-8gb",
+        "idleW": 3,
+        "typicalW": 8,
+        "qty": 1,
+        "ip": "192.168.1.3"
+      },
+      {
+        "id": "host-vm",
+        "name": "haos",
+        "type": "vm",
+        "partId": "",
+        "idleW": 0,
+        "typicalW": 0,
+        "qty": 1,
+        "ip": "192.168.1.30"
+      }
+    ]
+  },
+  "tokens": {
+    "s": "s=eyJ2ZXJzaW9uIjoxLCJyZWdpb24iOm51bGwsImN1cnJlbmN5IjoiVVNEIiwicmF0ZSI6MC4yLCJ0b3UiOmZhbHNlLCJvZmZSYXRlIjowLjE1LCJwZWFrUmF0ZSI6MC4zNSwicGVha1N0YXJ0IjoxNiwicGVha0VuZCI6MjEsIm9mZlN0YXJ0IjowLCJvZmZFbmQiOjcsInBlcmlvZHMiOltdLCJjb25zb2xpZGF0ZVdhdHRzIjo1NSwicmVwbGFjZW1lbnRXYXR0cyI6MjUsInByaWNlIjozNTAsInZvbHRhZ2VNb2RlIjoiMTIwIiwidm9sdGFnZSI6MTIwLCJicmVha2VyIjoxNSwiZGV2aWNlcyI6W3siaWQiOiJob3N0LXB2ZTEiLCJuYW1lIjoicHZlMSIsImlkbGUiOjgsImxvYWQiOjM1LCJsb2FkUGN0IjoyMCwiaG91cnMiOjI0LCJzdGFydCI6MCwic2VsZWN0ZWQiOnRydWV9LHsiaWQiOiJob3N0LXBpIiwibmFtZSI6InBpLWRucyIsImlkbGUiOjMsImxvYWQiOjgsImxvYWRQY3QiOjAsImhvdXJzIjowLCJzdGFydCI6MCwic2VsZWN0ZWQiOnRydWV9XX0",
+    "p": "p=z.H4sIAAAAAAAAA3WPwWrEIBRFf6W8tQZNmpL6B7PoehalC00eMzJGHbVhwpB_L0ppnMKAm-vleo53WEBwAtF9hxFBwNnNaKSi1iVUzl2AgJVzbg42YXD-JcrZGwQCizNJnvDDTbnmLdvvQPCWEVAB5QUDCN4TmHDRI0YQn3fQU0HFRP2CfGf8prT6koK7ze5GbSYQ8DKkQx4qRKPtheKVt9RylsF6MngEMZSxHqU5guh6Ate0lg9qnx3f24a_DQ1veN7McsyvjaJ9FZwLxsqRsJEHQ135aTrZWBnq2ivI6BWGsFKv6UPo6XBSu2VXWw5PJbt_Jsu8m5ylqzxK8-exg1gNYs9BDLav7Qe334iUDAIAAA",
+    "n": "n=z.H4sIAAAAAAAAA7WSMU_DMBCF_wp6s1PFaYuCZxYkkFgQQ9Xhkpyo1cQ2thuoqv535CZAAxMCJA_3zvLde598QA8lBQwUbkxkb91FoM61DAGGOqC3baQnvrMNQ0EWOcR7D0oWuUDlmbbsoeTyKLCBWh2gGyhsbIiZ61lCwFCX3o8q7t1Jefva2dfMpOEC2qUNV8VMXpYzOZNpVUc1FKpaFQslpcrz06FkoqXkOlXdaR0EHHk28WZUxkYOQ6mblh8pxgBVCrSWmlHNl4O8ryNUSrOxOx-gioWAsy_s78kPAyvmVpttxs-yyIzMk7uK6u3O3dqaorajm5ZCfHANRR5tvJD3ZOL-miIPncC-13XytlofxYSWPmOls8aEM1r6O6P5B6JfEJlPiJRfg3sKrmLv95nT2UQss_Kp-g8MffeJYUP2DMLp5iuE_AcUJp_yE8c08h9lWh_fAMg11L9gAwAA",
+    "notebookUrlS": "https://heemsec.github.io/homelab-power/#s=eyJ2ZXJzaW9uIjoxLCJyZWdpb24iOm51bGwsImN1cnJlbmN5IjoiVVNEIiwicmF0ZSI6MC4yLCJ0b3UiOmZhbHNlLCJvZmZSYXRlIjowLjE1LCJwZWFrUmF0ZSI6MC4zNSwicGVha1N0YXJ0IjoxNiwicGVha0VuZCI6MjEsIm9mZlN0YXJ0IjowLCJvZmZFbmQiOjcsInBlcmlvZHMiOltdLCJjb25zb2xpZGF0ZVdhdHRzIjo1NSwicmVwbGFjZW1lbnRXYXR0cyI6MjUsInByaWNlIjozNTAsInZvbHRhZ2VNb2RlIjoiMTIwIiwidm9sdGFnZSI6MTIwLCJicmVha2VyIjoxNSwiZGV2aWNlcyI6W3siaWQiOiJob3N0LXB2ZTEiLCJuYW1lIjoicHZlMSIsImlkbGUiOjgsImxvYWQiOjM1LCJsb2FkUGN0IjoyMCwiaG91cnMiOjI0LCJzdGFydCI6MCwic2VsZWN0ZWQiOnRydWV9LHsiaWQiOiJob3N0LXBpIiwibmFtZSI6InBpLWRucyIsImlkbGUiOjMsImxvYWQiOjgsImxvYWRQY3QiOjAsImhvdXJzIjowLCJzdGFydCI6MCwic2VsZWN0ZWQiOnRydWV9XX0",
+    "notebookUrlP": "https://heemsec.github.io/homelab-notebook/#p=z.H4sIAAAAAAAAA3WPwWrEIBRFf6W8tQZNmpL6B7PoehalC00eMzJGHbVhwpB_L0ppnMKAm-vleo53WEBwAtF9hxFBwNnNaKSi1iVUzl2AgJVzbg42YXD-JcrZGwQCizNJnvDDTbnmLdvvQPCWEVAB5QUDCN4TmHDRI0YQn3fQU0HFRP2CfGf8prT6koK7ze5GbSYQ8DKkQx4qRKPtheKVt9RylsF6MngEMZSxHqU5guh6Ate0lg9qnx3f24a_DQ1veN7McsyvjaJ9FZwLxsqRsJEHQ135aTrZWBnq2ivI6BWGsFKv6UPo6XBSu2VXWw5PJbt_Jsu8m5ylqzxK8-exg1gNYs9BDLav7Qe334iUDAIAAA",
+    "powerSendUrl": "https://heemsec.github.io/homelab-notebook/#p=z.H4sIAAAAAAAAA3WPwWrEIBRFf6W8tQZNmpL6B7PoehalC00eMzJGHbVhwpB_L0ppnMKAm-vleo53WEBwAtF9hxFBwNnNaKSi1iVUzl2AgJVzbg42YXD-JcrZGwQCizNJnvDDTbnmLdvvQPCWEVAB5QUDCN4TmHDRI0YQn3fQU0HFRP2CfGf8prT6koK7ze5GbSYQ8DKkQx4qRKPtheKVt9RylsF6MngEMZSxHqU5guh6Ate0lg9qnx3f24a_DQ1veN7McsyvjaJ9FZwLxsqRsJEHQ135aTrZWBnq2ivI6BWGsFKv6UPo6XBSu2VXWw5PJbt_Jsu8m5ylqzxK8-exg1gNYs9BDLav7Qe334iUDAIAAA"
+  }
+}

@@ -11,7 +11,8 @@
 <div class="rack-rail" aria-hidden="true"></div>
 <nav class="sitenav" aria-label="Sections"><a href="index.html" aria-current="page">Calculator</a><a href="planner.html">Planner</a><a href="settings.html">Settings</a></nav>
 <main>
-<div class="toolbar"><p><span class="dot"></span> <span id="saveStatus" role="status">Saved on this device.</span></p><div><button id="share" class="secondary">Copy share link</button><button id="reset" class="quiet">Load demo</button><button id="theme" class="quiet" aria-pressed="false">Light mode</button></div></div>
+<div class="toolbar"><p><span class="dot"></span> <span id="saveStatus" role="status">Saved on this device.</span></p><div><button id="share" class="secondary">Copy share link</button><button id="sendNotebook" class="secondary">Send to Notebook</button><button id="reset" class="quiet">Load demo</button><button id="theme" class="quiet" aria-pressed="false">Light mode</button></div></div>
+<p id="notebookBanner" class="upsell" hidden>You're just looking. This lab isn't saved on this device. <button type="button" id="notebookBack" class="quiet">Back to my lab</button></p>
 <nav class="subtabs" data-subtabs="calculator" aria-label="Calculator sections">
 <button type="button" data-subtab="devices" aria-selected="true"><span>Devices</span><small data-sum="devices">Your gear</small></button>
 <button type="button" data-subtab="costs"><span>Costs</span><small data-sum="costs">The bill</small></button>
@@ -48,5 +49,21 @@
 <section id="reportCard" class="card pro-card" aria-labelledby="reportTitle"><div class="section-heading"><div><p class="step">PRINT</p><h2 id="reportTitle">Take the numbers with you</h2></div></div><p class="pro-lock">A printable report is in the preview.</p><div class="pro-content" hidden><p class="help">It lists devices, schedules, totals, the rate, where that rate came from, and the date. Save a PDF from the browser's print dialog. Android uses the system print sheet.</p><div class="pro-actions"><button id="showReport" class="secondary">Preview the report</button><button id="printReportButton" class="secondary">Print or save PDF</button></div></div></section><section id="printReport" class="print-sheet" aria-label="Lab report you can print" hidden></section><aside class="measurement"><span class="measure-icon">ϟ</span><div><h3>Measure it once. The guess gets better.</h3><p>Put a plug meter on the device. Write down the idle draw after it settles, then what it pulls while doing real work. Even better, log kWh for a few days and compare. Count the disks, supply losses, and the switch. The wattage printed on the PSU is a ceiling, not what it actually draws.</p></div></aside>
 </div>
 <footer><p>Built for homelabbers, not for advertisers. It all stays in your browser.</p><p><a href="privacy.html">Privacy policy</a></p><p>A year here is 365 days. A typical day mixes 5 weekdays with 2 weekend days, and a month is 365 divided by 12. Estimates, not a quote from the utility.</p><p>A share link includes device names and settings. Don't pass it on if you'd rather keep those to yourself.</p></footer>
-</main><div id="toast" role="status" aria-live="polite"></div>
+</main>
+<dialog id="notebookImport" aria-labelledby="notebookImportTitle">
+<div class="dialog-body">
+<h2 id="notebookImportTitle">A lab from a link</h2>
+<p id="notebookImportIntro" class="help"></p>
+<ul id="notebookImportList"></ul>
+<p id="notebookImportNote" class="help">Nothing is saved until you choose.</p>
+<div class="pro-actions notebook-actions">
+<button type="button" id="notebookView">View read-only</button>
+<button type="button" id="notebookLoad" class="secondary">Load as new lab</button>
+<button type="button" id="notebookMerge" class="secondary">Merge into this lab <span class="pro-badge">Pro</span></button>
+<button type="button" id="notebookResync" class="secondary">Update linked devices <span class="pro-badge">Pro</span></button>
+<button type="button" id="notebookClose" class="quiet">Not now</button>
+</div>
+</div>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
 </body></html>

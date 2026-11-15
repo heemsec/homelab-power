@@ -54,5 +54,8 @@ $('printReportButton').addEventListener('click',async()=>{if(!openReport())retur
 window.addEventListener('beforeprint',renderReport);
 window.addEventListener('power:change',()=>{if(book){P.active(book).state=A.getState();scheduleBook();}renderSchedules();if(pro()){renderCompare();renderReport();}});
 window.addEventListener('power:entitlement',gate);
+window.PowerLabs={profileCount:()=>book?book.profiles.length:0,addLab(name,next){ensureBook();let title=String(name||'Notebook lab').replace(/[<>]/g,'').trim().slice(0,60)||'Notebook lab';if(book.profiles.some(p=>p.name.toLocaleLowerCase()===title.toLocaleLowerCase())){const base=title.slice(0,48);title=base+' from Notebook';let n=2;while(book.profiles.some(p=>p.name.toLocaleLowerCase()===title.toLocaleLowerCase()))title=base+' from Notebook '+n++;title=title.slice(0,60);}const p=P.addProfile(book,title,next);A.replaceState(p.state);saveBook();renderProfiles();}};
+window.PowerLabsReady=true;
+if(A.pendingNotebook)A.openNotebookSheet();
 gate();if(book)saveBook();
 })();
