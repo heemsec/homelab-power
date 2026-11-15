@@ -31,7 +31,7 @@ async function shot(page, name) {
   await page.evaluate(() => { const nav = document.querySelector('.sitenav'); if (nav) nav.style.visibility = ''; });
 }
 
-async function loadNick(page) {
+async function loadMinilab(page) {
   await page.goto(`${base}/planner.html`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => [...document.querySelectorAll('#presetSelect option')].some(o => o.value === 'nicks-8u-minilab'));
   await page.selectOption('#presetSelect', 'nicks-8u-minilab');
@@ -110,12 +110,12 @@ const browser = await chromium.launch({ channel: 'chrome', headless: true });
 try {
   const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, colorScheme: 'dark' });
   const page = await phone.newPage();
-  await loadNick(page);
+  await loadMinilab(page);
   expectFull(await rackReport(page), 'phone dark free');
   await shot(page, 'rack_full_phone_free_3x.png');
 
   await page.evaluate(() => localStorage.setItem('homelab-power-preview-pro', 'true'));
-  await loadNick(page);
+  await loadMinilab(page);
   await page.waitForFunction(() => document.querySelector('#previewPro')?.checked || localStorage.getItem('homelab-power-preview-pro') === 'true');
   expectFull(await rackReport(page), 'phone dark pro');
   await shot(page, 'rack_full_phone_pro_3x.png');
@@ -124,11 +124,11 @@ try {
   const fold = await browser.newContext({ viewport: { width: 673, height: 841 }, deviceScaleFactor: 2, colorScheme: 'light' });
   const wide = await fold.newPage();
   await wide.addInitScript(() => localStorage.setItem('homelab-power-theme', 'light'));
-  await loadNick(wide);
+  await loadMinilab(wide);
   expectFull(await rackReport(wide), 'fold light free');
   await shot(wide, 'rack_full_fold_free_2x.png');
   await wide.evaluate(() => localStorage.setItem('homelab-power-preview-pro', 'true'));
-  await loadNick(wide);
+  await loadMinilab(wide);
   expectFull(await rackReport(wide), 'fold light pro');
   await shot(wide, 'rack_full_fold_pro_2x.png');
 
