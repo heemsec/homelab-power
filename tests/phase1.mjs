@@ -62,7 +62,7 @@ try {
   check(/18\.1 W/.test(idle), `idle shows one decimal (${idle})`);
   check(Math.abs(precise - 22.05) < 0.02, `typical stays precise (${precise})`);
   check(/22\.1 W/.test(typical), `22.05 W displays as 22.1 (${typical})`);
-  check(await page.locator('#fitWarning').isHidden(), 'Nick preset fits with no warning');
+  check(await page.locator('#fitWarning').isHidden(), '8U minilab fits with no warning');
   const zero = await page.locator('#rackZero').innerText();
   check(/0U top \/ rear/.test(zero) && /fan/i.test(zero), 'fan is visible as a 0U top/rear part');
   check(/shelf/i.test(await page.locator('#frameNote').innerText()), 'shelf share is explained');
@@ -117,7 +117,7 @@ try {
   const settings = await context.newPage();
   await settings.setViewportSize({ width: 390, height: 844 });
   await settings.goto(`${base}/settings.html`, { waitUntil: 'domcontentloaded' });
-  check((await settings.locator('#aboutVersion').innerText()) === '1.3.5', 'About reads the single version');
+  check((await settings.locator('#aboutVersion').innerText()) === '1.3.6', 'About reads the single version');
   check(await settings.locator('#backup .pro-badge').isVisible(), 'backup stays visible with a Pro badge');
   await settings.click('#backup');
   check(await settings.locator('#proPrompt').evaluate(el => el.open), 'a locked backup opens the Pro prompt');

@@ -974,31 +974,77 @@ function wire() {
     if (!e.target.dataset?.battery) return;
     renderUps(shown());
   });
-  document.body.addEventListener('click', e => {
-    const swap = e.target.closest('[data-swap]');
-    if (swap) { applySwap(swap.dataset.swap); return; }
-    if (shared && e.target.closest('[data-edit], [data-add], [data-act], #loadPreset, #newBuild, #sendCalc, #customPartForm button')) return previewToast();
-    const edit = e.target.closest('[data-edit]');
-    if (edit) { openEdit(edit.dataset.edit); return; }
-    const add = e.target.closest('[data-add]');
-    if (add) { addPart(add.dataset.add, add.dataset.where); return; }
-    const act = e.target.closest('[data-act]');
-    if (!act) return;
-    const item = findItem(act.dataset.uid);
+  const eventEl = event => {
+    const raw = event.target;
+    return raw instanceof Element ? raw : raw?.parentElement || null;
+  };
+  // A tap can deliver pointerup and a second click after the list is rebuilt. The second one was putting a part straight back in the rack.
+  let fromPointer = false;
+  let actedUid = '';
+  let actedAt = 0;
+  function keepPlace(uid) {
+    const y = window.scrollY;
+    const card = uid ? document.querySelector(`.shelf-item [data-uid="${CSS.escape(uid)}"]`)?.closest('.shelf-item') : null;
+    const top = card ? card.getBoundingClientRect().top : null;
+    const focused = document.activeElement;
+    if (focused instanceof HTMLElement && focused !== document.body) focused.blur();
+    return () => {
+      const next = uid ? document.querySelector(`.shelf-item [data-uid="${CSS.escape(uid)}"]`)?.closest('.shelf-item') : null;
+      if (next && top != null) window.scrollTo(0, window.scrollY + next.getBoundingClientRect().top - top);
+      else window.scrollTo(0, y);
+    };
+  }
+  function runItemAct(act) {
+    const id = act.dataset.uid;
+    const now = performance.now();
+    if (id && id === actedUid && now - actedAt < 450) return;
+    actedUid = id || '';
+    actedAt = now;
+    const item = findItem(id);
     if (!item) return;
-    if (act.dataset.act === 'remove') active().items = active().items.filter(it => it !== item);
-    else if (act.dataset.act === 'shelf') { item.placement = 'shelf'; item.startU = null; item.ownSlot = false; }
-    else if (act.dataset.act === 'rack') {
+    const kind = act.dataset.act;
+    if (kind === 'up' || kind === 'down') {
+      const step = stepOf(active().width);
+      if (!Number.isFinite(item.startU)) return;
+      item.startU = roundU(item.startU + (kind === 'up' ? 1 : -1) * step);
+    } else if (kind === 'remove') active().items = active().items.filter(it => it !== item);
+    else if (kind === 'shelf') { item.placement = 'shelf'; item.startU = null; item.hostedBy = null; item.ownSlot = false; }
+    else if (kind === 'rack') {
       const part = partById(item.partId);
       item.placement = isZeroUFan(part) ? 'zerou' : (defaultPlacement(part, active().width) === 'frame' ? 'frame' : 'rack');
       item.startU = null;
       item.hostedBy = null;
       item.ownSlot = isShelfRider(part);
-    }
-    else if (act.dataset.act === 'up') nudge(item, 1);
-    else if (act.dataset.act === 'down') nudge(item, -1);
+    } else return;
+    const restore = keepPlace(kind === 'remove' ? '' : id);
     scheduleSave();
     render();
+    restore();
+    requestAnimationFrame(restore);
+  }
+  document.body.addEventListener('pointerdown', () => { fromPointer = false; });
+  document.body.addEventListener('pointerup', e => {
+    if (e.button != null && e.button !== 0) return;
+    const act = eventEl(e)?.closest('[data-act]');
+    if (!act || drag?.active) return;
+    fromPointer = true;
+    if (shared) return previewToast();
+    runItemAct(act);
+  });
+  document.body.addEventListener('click', e => {
+    const el = eventEl(e);
+    if (!el) return;
+    const swap = el.closest('[data-swap]');
+    if (swap) { applySwap(swap.dataset.swap); return; }
+    if (shared && el.closest('[data-edit], [data-add], [data-act], #loadPreset, #newBuild, #sendCalc, #customPartForm button')) return previewToast();
+    const edit = el.closest('[data-edit]');
+    if (edit) { openEdit(edit.dataset.edit); return; }
+    const add = el.closest('[data-add]');
+    if (add) { addPart(add.dataset.add, add.dataset.where); return; }
+    const act = el.closest('[data-act]');
+    if (!act) return;
+    if (fromPointer) { fromPointer = false; return; }
+    runItemAct(act);
   });
   document.body.addEventListener('input', e => {
     const field = e.target.dataset?.field;
