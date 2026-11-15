@@ -14,6 +14,7 @@
 }
 
 .page-intro{max-width:none;padding-top:var(--space-4)}
+main>.eyebrow{padding-top:24px}
 .bento{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-2);align-items:stretch}
 .bento-span{grid-column:1/-1}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--space-2);min-width:0}
