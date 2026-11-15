@@ -28,25 +28,28 @@ const pages = [
 async function look(page, label, theme) {
   const report = await page.evaluate(() => {
     const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim().toLowerCase();
-    const logo = document.querySelector('.logo svg');
-    const banner = document.querySelector('.brand-banner');
-    const button = document.querySelector('button');
+    const logo = document.querySelector('.logo');
+    const svg = logo && logo.querySelector('svg');
+    const tile = logo ? getComputedStyle(logo) : null;
     const old = ['#b4ef86', '#326319', '#213123', '#e9f2df'];
     const hit = old.filter(hex => document.documentElement.outerHTML.toLowerCase().includes(hex));
     return {
       bg: css('--bg'),
       accent: css('--accent'),
       ink: css('--accent-ink'),
-      logo: !!logo,
-      banner: !!banner && banner.getBoundingClientRect().height <= 40,
-      buttonBg: button ? getComputedStyle(button).backgroundColor : '',
+      logo: svg && svg.getAttribute('viewBox') === '0 0 108 108',
+      banner: !!document.querySelector('.brand-banner'),
+      tile: tile ? { bg: tile.backgroundColor, fg: tile.color, w: tile.width } : null,
       wide: document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
       leftover: hit
     };
   });
   const dark = theme === 'dark';
-  check(report.logo, `${label}: the rack mark is in the header`);
-  check(report.banner, `${label}: the banner stays a single short row`);
+  check(report.logo, `${label}: the approved rack mark is in the header`);
+  check(report.banner === false, `${label}: the extra banner is gone`);
+  check(report.tile && report.tile.w === '40px', `${label}: the logo tile is 40px (${report.tile && report.tile.w})`);
+  check(report.tile && report.tile.bg === (dark ? 'rgb(255, 255, 255)' : 'rgb(49, 106, 215)'), `${label}: logo tile is ${report.tile && report.tile.bg}`);
+  check(report.tile && report.tile.fg === (dark ? 'rgb(11, 22, 40)' : 'rgb(255, 255, 255)'), `${label}: logo mark is ${report.tile && report.tile.fg}`);
   check(report.wide, `${label}: no sideways scroll`);
   check(report.leftover.length === 0, `${label}: the page source has no old green${report.leftover.length ? ' ' + report.leftover.join(',') : ''}`);
   check(report.bg === (dark ? '#0b1628' : '#f7fbfe'), `${label}: page background is ${report.bg}`);
@@ -58,8 +61,8 @@ const browser = await chromium.launch({ channel: 'chrome', headless: true });
 try {
   for (const [theme, scheme] of [['dark', 'dark'], ['light', 'light']]) {
     for (const [name, file, width, height, scale] of [
-      ...pages.map(([name, file]) => [name, file, 390, 844, 3]),
-      ...pages.map(([name, file]) => [name, file, 673, 841, 2])
+      ...pages.map(([name, file]) => [name, file, 390, 844, 1]),
+      ...pages.map(([name, file]) => [name, file, 673, 841, 1])
     ]) {
       const size = width === 390 ? 'phone' : 'fold';
       const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: scale, colorScheme: scheme });
@@ -70,7 +73,6 @@ try {
       await page.evaluate(() => { const t = document.getElementById('toast'); if (t) t.style.display = 'none'; });
       const label = `${name} ${size} ${theme}`;
       await look(page, label, theme);
-      await page.screenshot({ path: `${shots}/brand_${name}_${size}_${theme}.png` });
       await ctx.close();
     }
   }

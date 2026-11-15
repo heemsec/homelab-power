@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 36">
-  <rect width="280" height="36" rx="10" fill="#3D8FE0"/>
-  <g fill="#0B1628" transform="translate(10 6)">
-    <path d="M1 1h5v22H1zm17 0h5v22h-5zM6 2h12v4H6zm0 16h12v4H6z"/>
-    <path d="M15 6 9 12h3l-2 6 7-7h-4z"/>
-  </g>
-  <text x="44" y="24" fill="#0B1628" font-family="system-ui,sans-serif" font-size="13" font-weight="700" letter-spacing="1.6">HOMELAB POWER</text>
-</svg>
