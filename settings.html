@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Defaults, theme, and a backup of everything Homelab Power stores on this device.">
 <meta name="theme-color" content="#0B1628"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Homelab Power"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script src="theme.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="ui.css"><script src="version.js"></script><script src="entitlement.js"></script><script defer src="pwa.js"></script><script defer src="settings.js"></script>
+<script src="theme.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="ui.css"><script src="version.js"></script><script src="entitlement.js"></script><script defer src="subtabs.js"></script><script defer src="pwa.js"></script><script defer src="settings.js"></script>
 <title>Settings · Homelab Power</title>
 </head>
 <body>
@@ -14,11 +14,18 @@
 <p class="eyebrow">SETTINGS</p>
 <h1>Defaults for the next lab</h1>
 <p class="help">A lab you've already saved keeps its own rate until you change it on the calculator. A new one starts here. <span id="saveStatus" role="status">Saved on this device.</span></p>
+<nav class="subtabs" data-subtabs="settings" aria-label="Settings sections">
+<button type="button" data-subtab="general" aria-selected="true"><span>General</span><small data-sum="general">Rate and theme</small></button>
+<button type="button" data-subtab="pro"><span>Pro & backup</span><small data-sum="pro">Backup</small></button>
+</nav>
+<div data-panel="pro" hidden>
 <section class="card" id="supportCard" hidden aria-labelledby="supportTitle">
 <h2 id="supportTitle">Leave a tip</h2>
 <p class="help" id="supportNote">Enjoying the app? You can leave a tip any time. It doesn't unlock anything, it just helps me keep building.</p>
 <div id="supportMount"></div>
 </section>
+</div>
+<div data-panel="general">
 <section class="card" aria-labelledby="defaultsTitle"><h2 id="defaultsTitle">Rate, numbers, look</h2>
 <div class="settings-grid">
 <label>Currency<select id="currency"><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option><option value="GBP">GBP (£)</option><option value="CAD">CAD ($)</option><option value="AUD">AUD ($)</option><option value="JPY">JPY (¥)</option><option value="INR">INR (₹)</option></select></label>
@@ -40,11 +47,14 @@
 </div>
 <p id="paletteUpsell" class="upsell" hidden>Nordic Server and Amber Terminal are Pro themes. Preview Pro on the planner or the calculator, or unlock them in the Android app, and the one you already picked comes back. Until then the page stays on Sky Blue, and the pick is not forgotten.</p>
 </section>
+</div>
+<div data-panel="pro" hidden>
 <section class="card" aria-labelledby="backupTitle"><h2 id="backupTitle">Backup</h2>
 <p class="help" id="backupIntro">The lab saves itself on this device as you go. A file you can download, or bring back later, is part of Pro.</p>
 <div class="pro-actions"><button id="backup" type="button">Download backup <span class="pro-badge">Pro</span></button><button id="restoreBtn" type="button" class="secondary">Restore a file <span class="pro-badge">Pro</span></button><input id="restore" type="file" accept="application/json,.json" class="sr-only" aria-label="Backup file to restore"><button id="clearData" type="button" class="quiet">Erase everything on this device</button></div>
 <p id="backupStatus" class="help" role="status"></p>
 </section>
+</div>
 <dialog id="proPrompt" aria-labelledby="proPromptTitle">
 <form method="dialog" class="dialog-body">
 <h2 id="proPromptTitle">That's part of Pro</h2>
@@ -55,11 +65,13 @@
 </div>
 </form>
 </dialog>
+<div data-panel="general">
 <section class="card" aria-labelledby="aboutTitle"><h2 id="aboutTitle">About</h2>
 <p>Version <span id="aboutVersion"></span></p>
 <p><a href="privacy.html">Privacy policy</a></p>
 <p><a href="https://github.com/heemsec/homelab-power">Source on GitHub</a></p>
 </section>
+</div>
 </main>
 <div id="toast" role="status" aria-live="polite"></div>
 </body>

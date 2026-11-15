@@ -1,8 +1,8 @@
 [
   {
     "id": "nicks-8u-minilab",
-    "name": "Nick's 8U 10\" minilab",
-    "description": "Nick's own build: one Lenovo M720q in a RackMate T1 with a small switch, patch panel, 10\" screen and a USB fan.",
+    "name": "8U 10\" minilab",
+    "description": "A compact build: one Lenovo M720q in a RackMate T1 with a small switch, patch panel, 10\" screen and a USB fan.",
     "items": [
       {
         "partId": "deskpi-geeekpi-rackmate-t1-8u",

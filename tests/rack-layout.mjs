@@ -42,7 +42,7 @@ async function loadNick(page) {
 async function rackReport(page) {
   return page.evaluate(() => {
     const frame = document.querySelector('#rackDrop');
-    const heading = [...document.querySelectorAll('h3')].find(h => /Parts in this build/.test(h.textContent));
+    const heading = document.querySelector('#partsTitle');
     const rows = [...document.querySelectorAll('#rackDrop .rack-row')];
     const blocks = [...document.querySelectorAll('#rackDrop .rack-block')];
     const clips = el => {
@@ -89,7 +89,7 @@ async function rackReport(page) {
       rows: rows.map(row => row.querySelector('span').textContent.trim()),
       rowProblems,
       blockProblems,
-      overlap: headBox.top < frameBox.bottom - 1,
+      overlap: !heading.closest('[hidden]') && headBox.top < frameBox.bottom - 1,
       frameH: Math.round(frameBox.height),
       blocks: blocks.length
     };

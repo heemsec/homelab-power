@@ -16,6 +16,10 @@ function check(cond, message) {
   if (cond) console.log('ok', message);
   else { console.error('FAIL', message); failures.push(message); }
 }
+async function reload(page) {
+  try { await page.reload({ waitUntil: 'domcontentloaded' }); }
+  catch { await page.reload({ waitUntil: 'domcontentloaded' }); }
+}
 
 async function metrics(page) {
   return page.evaluate(() => {
@@ -62,7 +66,7 @@ try {
   check(/18\.1 W/.test(idle), `idle shows one decimal (${idle})`);
   check(Math.abs(precise - 22.05) < 0.02, `typical stays precise (${precise})`);
   check(/22\.1 W/.test(typical), `22.05 W displays as 22.1 (${typical})`);
-  check(await page.locator('#fitWarning').isHidden(), 'Nick preset fits with no warning');
+  check(await page.locator('#fitWarning').isHidden(), '8U minilab fits with no warning');
   const zero = await page.locator('#rackZero').innerText();
   check(/0U top \/ rear/.test(zero) && /fan/i.test(zero), 'fan is visible as a 0U top/rear part');
   check(/shelf/i.test(await page.locator('#frameNote').innerText()), 'shelf share is explained');
@@ -70,6 +74,7 @@ try {
   const blocks = await page.locator('.rack-block').allInnerTexts();
   check(blocks.some(t => /M720q/.test(t) && /shelf/i.test(t)), `mini PC shares the shelf block (${blocks.join(' | ')})`);
 
+  await page.click('[data-subtab="parts"]');
   await page.fill('#partSearch', 'M720q');
   await page.waitForSelector('[data-edit="lenovo-thinkcentre-m720q-tiny"]');
   const listName = await page.locator('#catalog .part-row b').first().innerText();
@@ -90,7 +95,8 @@ try {
   check(Math.abs(editedIdle - 14.1) < 0.05, `edited idle total is 14.1 (${editedIdle})`);
   check(/Edited/.test(await page.locator('#catalog').innerText()), 'edited badge shows');
 
-  await page.reload({ waitUntil: 'domcontentloaded' });
+  await reload(page);
+  await page.click('[data-subtab="parts"]');
   await page.waitForFunction(() => Number(document.querySelector('#idleTotal')?.dataset.w) > 10);
   const saved = Number(await page.locator('#idleTotal').getAttribute('data-w'));
   check(Math.abs(saved - 14.1) < 0.05, `saved build keeps the correction (${saved})`);
@@ -117,13 +123,14 @@ try {
   const settings = await context.newPage();
   await settings.setViewportSize({ width: 390, height: 844 });
   await settings.goto(`${base}/settings.html`, { waitUntil: 'domcontentloaded' });
-  check((await settings.locator('#aboutVersion').innerText()) === '1.3.5', 'About reads the single version');
+  await settings.click('[data-subtab="pro"]');
+  check((await settings.locator('#aboutVersion').innerText()) === '1.3.7', 'About reads the single version');
   check(await settings.locator('#backup .pro-badge').isVisible(), 'backup stays visible with a Pro badge');
   await settings.click('#backup');
   check(await settings.locator('#proPrompt').evaluate(el => el.open), 'a locked backup opens the Pro prompt');
   await settings.click('#proPromptClose');
   await settings.evaluate(() => localStorage.setItem('homelab-power-preview-pro', 'true'));
-  await settings.reload({ waitUntil: 'domcontentloaded' });
+  await reload(settings);
   const [download] = await Promise.all([
     settings.waitForEvent('download'),
     settings.click('#backup')
@@ -133,7 +140,7 @@ try {
   await settings.click('#clearData');
   await settings.waitForTimeout(200);
   await settings.evaluate(() => localStorage.setItem('homelab-power-preview-pro', 'true'));
-  await settings.reload({ waitUntil: 'domcontentloaded' });
+  await reload(settings);
   settings.once('dialog', dialog => dialog.accept());
   await settings.setInputFiles('#restore', backupPath);
   await settings.waitForFunction(() => (document.querySelector('#backupStatus')?.textContent || '').includes('Restored'));
@@ -144,15 +151,20 @@ try {
   check(restored === 7, `backup round-trip kept idle 7 (${restored})`);
   await settings.evaluate(() => localStorage.removeItem('homelab-power-preview-pro'));
 
-  await page.reload({ waitUntil: 'domcontentloaded' });
+  await reload(page);
   await page.waitForFunction(() => Math.abs(Number(document.querySelector('#idleTotal')?.dataset.w) - 16.1) < 0.05);
   check(true, 'planner still shows the restored correction');
 
+  await page.click('[data-subtab="parts"]');
   await page.click('#previewPro');
+  await page.click('[data-subtab="rack"]');
   await page.selectOption('#presetSelect', 'nicks-8u-minilab');
   page.once('dialog', dialog => dialog.accept());
+  await page.click('[data-subtab="parts"]');
   await page.click('#newBuild');
+  await page.click('[data-subtab="rack"]');
   await page.click('#loadPreset');
+  await page.click('[data-subtab="parts"]');
   await page.selectOption('#compareA', { index: 0 });
   await page.selectOption('#compareB', { index: 1 });
   const compare = await page.locator('#comparison').innerText();
@@ -175,30 +187,30 @@ try {
   }
 
   const dragPage = await context.newPage();
-  await dragPage.setViewportSize({ width: 1280, height: 1000 });
+  await dragPage.setViewportSize({ width: 1280, height: 1600 });
   await dragPage.goto(`${base}/planner.html`, { waitUntil: 'domcontentloaded' });
+  await dragPage.click('[data-subtab="parts"]');
   await dragPage.waitForSelector('#catalog .part-row');
   await dragPage.evaluate(() => localStorage.removeItem('homelab-power-builds-v1'));
-  await dragPage.reload({ waitUntil: 'domcontentloaded' });
+  await reload(dragPage);
+  await dragPage.click('[data-subtab="parts"]');
   await dragPage.waitForSelector('#catalog .part-row');
   await dragPage.fill('#partSearch', 'patch panel');
-  await dragPage.locator('#catalog .part-row').first().scrollIntoViewIfNeeded();
-  await dragPage.locator('#rackDrop').scrollIntoViewIfNeeded();
+  await dragPage.locator('#itemList').evaluate(el => el.scrollIntoView({ block: 'center' }));
   await dragPage.waitForTimeout(100);
   const before = await dragPage.locator('#itemList article').count();
   const from = await dragPage.locator('#catalog .part-row').first().boundingBox();
-  const rack = await dragPage.locator('#rackDrop').boundingBox();
+  const rack = await dragPage.locator('#itemList').boundingBox();
   await dragPage.mouse.move(from.x + 40, from.y + 16);
   await dragPage.mouse.down();
-  await dragPage.mouse.move(rack.x + rack.width / 2, rack.y + 80, { steps: 15 });
+  await dragPage.mouse.move(rack.x + rack.width / 2, rack.y + rack.height / 2, { steps: 15 });
   await dragPage.mouse.up();
   await dragPage.waitForTimeout(200);
   const afterMouse = await dragPage.locator('#itemList article').count();
   check(afterMouse === before + 1, `mouse drag added a part (${before} -> ${afterMouse})`);
 
   await dragPage.fill('#partSearch', '120mm');
-  await dragPage.locator('#catalog .part-row').first().scrollIntoViewIfNeeded();
-  await dragPage.locator('#itemList').scrollIntoViewIfNeeded();
+  await dragPage.locator('#itemList').evaluate(el => el.scrollIntoView({ block: 'center' }));
   await dragPage.waitForTimeout(100);
   const fanBox = await dragPage.locator('#catalog .part-row').first().boundingBox();
   const listBox = await dragPage.locator('#itemList').boundingBox();
@@ -217,7 +229,7 @@ try {
     fire('pointerup', end.x, end.y);
   }, {
     start: { x: fanBox.x + 30, y: fanBox.y + 16 },
-    end: { x: listBox.x + 40, y: listBox.y + 30 }
+    end: { x: listBox.x + listBox.width / 2, y: listBox.y + listBox.height / 2 }
   });
   await dragPage.waitForTimeout(200);
   const afterTouch = await dragPage.locator('#itemList article').count();

@@ -26,6 +26,7 @@ try {
   await page.waitForFunction(() => Number(document.querySelector('#idleTotal')?.dataset.w) > 15);
   const heat = Number(await page.locator('#idleHeat').getAttribute('data-btu'));
   check(Math.abs(heat - 18.1 * 3.412) < 0.02, `idle heat is watts times 3.412 (${heat})`);
+  await page.click('[data-subtab="power"]');
   check(/3\.412/.test(await page.locator('#heatNote').innerText()), 'heat note explains the conversion');
 
   await page.click('#copyBuild');
@@ -42,8 +43,10 @@ try {
   const saved = await preview.evaluate(() => JSON.parse(localStorage.getItem('homelab-power-builds-v1')).builds.length);
   check(saved >= 1, 'save a copy writes the build');
 
+  await page.click('[data-subtab="parts"]');
   await page.fill('#partSearch', 'BR1500MS2');
   await page.click('[data-add="apc-back-ups-pro-br1500ms2"]');
+  await page.click('[data-subtab="power"]');
   await page.waitForSelector('#upsCard:not([hidden])');
   const ups = await page.locator('#upsRuntime').innerText();
   check(/More than 2 hours 30 minutes/.test(ups), `light load stays above the first published point (${ups.slice(0, 220)})`);
@@ -53,19 +56,25 @@ try {
   check(!/Source Source/.test(ups), 'UPS card does not repeat a generic Source label');
   check(/Turn the 10\.1" monitor off when you're not using it/.test(await page.locator('#whatIfBody').innerText()), 'monitor suggestion uses a short name');
   page.once('dialog', dialog => dialog.accept());
+  await page.click('[data-subtab="rack"]');
   await page.selectOption('#presetSelect', 'classic-r730-synology-unifi');
   await page.click('#loadPreset');
+  await page.click('[data-subtab="power"]');
   await page.waitForFunction(() => /tiny PC/.test(document.querySelector('#whatIfBody')?.textContent || ''));
   const swapTitle = await page.locator('#whatIfBody h3').first().innerText();
   check(/Move the Dell R730 onto a tiny PC/.test(swapTitle), `rack server swap uses a short name (${swapTitle})`);
+  await page.click('[data-subtab="rack"]');
   await page.selectOption('#presetSelect', 'nicks-8u-minilab');
   page.once('dialog', dialog => dialog.accept());
   await page.click('#loadPreset');
+  await page.click('[data-subtab="power"]');
   await page.waitForFunction(() => /10\.1" monitor/.test(document.querySelector('#whatIfBody')?.textContent || ''));
 
   check(await page.locator('#whatIfLock').isVisible(), 'what-if swaps stay locked before Pro');
+  await page.click('[data-subtab="parts"]');
   await page.click('#previewPro');
   await page.waitForFunction(() => document.querySelector('#whatIfLock').hidden);
+  await page.click('[data-subtab="power"]');
   const swap = page.locator('[data-swap]').first();
   check(await swap.count() === 1, 'a conservative swap is offered');
   await swap.click();
@@ -74,9 +83,12 @@ try {
 
   const calc = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await calc.goto(`${base}/index.html`, { waitUntil: 'networkidle' });
+  await calc.click('[data-subtab="costs"]');
   await calc.waitForSelector('#heatLine');
   check(/3\.412/.test(await calc.locator('#heatLine').innerText()), 'calculator explains heat');
+  await calc.click('[data-subtab="devices"]');
   await calc.click('#previewPro');
+  await calc.click('[data-subtab="costs"]');
   await calc.click('#examplePeak');
   await calc.waitForFunction(() => /covered/.test(document.querySelector('#touIssues')?.textContent || ''));
   check(/not a real tariff|made up/i.test(await calc.locator('main').innerText()), 'the example is labeled as an example');

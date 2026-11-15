@@ -39,6 +39,7 @@ async function look(page, label, theme) {
       ink: css('--accent-ink'),
       logo: svg && svg.getAttribute('viewBox') === '0 0 108 108',
       banner: !!document.querySelector('.brand-banner'),
+      home: !!document.querySelector('.home-banner'),
       tile: tile ? { bg: tile.backgroundColor, fg: tile.color, w: tile.width } : null,
       wide: document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
       leftover: hit
@@ -48,8 +49,10 @@ async function look(page, label, theme) {
   check(report.logo, `${label}: the approved rack mark is in the header`);
   check(report.banner === false, `${label}: the extra banner is gone`);
   check(report.tile && report.tile.w === '40px', `${label}: the logo tile is 40px (${report.tile && report.tile.w})`);
-  check(report.tile && report.tile.bg === (dark ? 'rgb(255, 255, 255)' : 'rgb(49, 106, 215)'), `${label}: logo tile is ${report.tile && report.tile.bg}`);
-  check(report.tile && report.tile.fg === (dark ? 'rgb(11, 22, 40)' : 'rgb(255, 255, 255)'), `${label}: logo mark is ${report.tile && report.tile.fg}`);
+  const tileBg = report.home ? 'rgb(255, 255, 255)' : (dark ? 'rgb(255, 255, 255)' : 'rgb(49, 106, 215)');
+  const tileFg = report.home ? 'rgb(11, 22, 40)' : (dark ? 'rgb(11, 22, 40)' : 'rgb(255, 255, 255)');
+  check(report.tile && report.tile.bg === tileBg, `${label}: logo tile is ${report.tile && report.tile.bg}`);
+  check(report.tile && report.tile.fg === tileFg, `${label}: logo mark is ${report.tile && report.tile.fg}`);
   check(report.wide, `${label}: no sideways scroll`);
   check(report.leftover.length === 0, `${label}: the page source has no old green${report.leftover.length ? ' ' + report.leftover.join(',') : ''}`);
   check(report.bg === (dark ? '#0b1628' : '#f7fbfe'), `${label}: page background is ${report.bg}`);

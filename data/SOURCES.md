@@ -12,4 +12,4 @@ A few rules the file follows:
 - A PoE switch's max is the switch itself, not the budget it can hand out. Cameras and access points are their own parts. Counting both the PoE budget and the device would bill the same watt twice.
 - UPS idle watts are the unit's own draw with nothing plugged in, from an ENERGY STAR no-load test or a wall meter. Runtime estimates, when the planner shows them, use a separate manufacturer runtime sheet or a published battery size. Those runtime fields were not part of the watt re-check.
 
-Nick's 8U minilab adds up to 18.1 W idle and 22.05 W typical, which the page shows as 22.1 W. The switch in that build is 2 W, the USB fan is 0.6 W idle and 0.8 W typical, and the power hub is 0.5 W.
+The 8U 10" minilab adds up to 18.1 W idle and 22.05 W typical, which the page shows as 22.1 W. The switch in that build is 2 W, the USB fan is 0.6 W idle and 0.8 W typical, and the power hub is 0.5 W.

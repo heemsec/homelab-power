@@ -51,6 +51,7 @@ try {
   const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3 });
   const page = await phone.newPage();
   await page.goto(`${base}/settings.html`, { waitUntil: 'domcontentloaded' });
+  await page.click('[data-subtab="pro"]');
   await page.evaluate(() => localStorage.setItem('homelab-power-v1', JSON.stringify({ version: 1, currency: 'USD', rate: 0.2, devices: [{ id: 'd1', name: 'Kept lab', idle: 4, load: 8, loadPct: 0, hours: 24, start: 0, selected: true }] })));
   await page.reload({ waitUntil: 'domcontentloaded' });
   check(await page.locator('#backup').isVisible() && await page.locator('#restoreBtn').isVisible(), 'locked backup buttons stay visible');
@@ -97,6 +98,7 @@ try {
   const wide = await fold.newPage();
   await wide.addInitScript(nativeBilling);
   await wide.goto(`${base}/settings.html`, { waitUntil: 'domcontentloaded' });
+  await wide.click('[data-subtab="pro"]');
   check((await wide.locator('#backupIntro').innerText()).includes('part of Pro'), 'free intro stays on Android before purchase');
   check(await wide.locator('#backup .pro-badge').isVisible(), 'fold locked badge');
   await shot(wide, 'backup_free_fold_2x.png');
@@ -114,6 +116,7 @@ try {
   const buy = await phoneBuy.newPage();
   await buy.addInitScript(nativeBilling);
   await buy.goto(`${base}/settings.html`, { waitUntil: 'domcontentloaded' });
+  await buy.click('[data-subtab="pro"]');
   await showBackup(buy);
   await buy.click('#backup');
   check((await buy.locator('#proPromptGo').innerText()) === 'Get Pro', 'phone prompt offers Get Pro');
@@ -124,6 +127,7 @@ try {
   const web = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
   const calc = await web.newPage();
   await calc.goto(`${base}/index.html`, { waitUntil: 'domcontentloaded' });
+  await calc.click('[data-subtab="costs"]');
   check(await calc.locator('#exportCSV').isVisible(), 'CSV download stays on the page');
   check(await calc.locator('#share').isVisible(), 'share link stays on the page');
   await web.close();

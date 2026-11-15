@@ -271,6 +271,17 @@ function renderTotals(build) {
   $('typicalHeat').textContent = `${fmt(M.btuPerHour(t.typical), 1)} BTU/hr`;
   $('idleHeat').dataset.btu = String(M.btuPerHour(t.idle));
   $('typicalHeat').dataset.btu = String(M.btuPerHour(t.typical));
+  const head = $('buildHeading');
+  if (head) head.textContent = build.name || 'This build';
+  const meta = $('buildMeta');
+  if (meta) meta.textContent = `${build.width} inch · ${build.heightU}U`;
+  const tabs = window.HomelabSubtabs;
+  if (tabs) {
+    const n = build.items.length;
+    tabs.setSummary('rack', `${build.width} inch · ${build.heightU}U`);
+    tabs.setSummary('parts', n ? `${n} item${n === 1 ? '' : 's'} · ${Math.round(t.typical)} W` : 'Nothing in yet');
+    tabs.setSummary('power', `${money(year, currency)} a year`);
+  }
 }
 
 function itemButtons(it) {
@@ -336,17 +347,39 @@ function whereText(it) {
   if (it.placement === 'shelf') return 'On a shelf';
   return `In the rack at ${it.startU}U`;
 }
+const openRows = new Set();
+function slotLabel(it, build) {
+  if (it.placement === 'frame') return 'Frame';
+  if (it.placement === 'zerou') return '0U';
+  if (it.hostedBy || it.placement === 'shelf') return 'Shelf';
+  if (it.overflow || !Number.isFinite(it.startU)) return 'No slot';
+  const step = stepOf(build.width);
+  const top = roundU(it.startU + step);
+  const bottom = roundU(it.startU + (it.units || step));
+  return Math.abs(top - bottom) < 0.01 ? `U${top}` : `U${top}–${bottom}`;
+}
+function rowWatts(it) {
+  const w = oneWatts(it).typical * (it.qty || 1);
+  return `${new Intl.NumberFormat(locale(), {maximumFractionDigits: 1}).format(w)} W`;
+}
 function renderItems(build) {
   const items = build.items;
   $('itemList').innerHTML = items.length ? items.map(it => {
     const p = partById(it.partId);
     const w = oneWatts(it);
+    const open = openRows.has(it.uid);
     return `<article class="shelf-item" data-drag="item:${it.uid}">
-      <div><b>${esc(labelOf(p, it))}${it.qty > 1 ? ' ×' + it.qty : ''}</b>
-      <div class="part-meta">${whereText(it)}. ${wattsText(w.idle * (it.qty || 1))} idle, ${wattsText(w.typical * (it.qty || 1))} typical. <span class="badge${p?.edited ? ' edited' : ''}">${esc(badge(p))}</span>
-      ${p?.source ? `<a href="${esc(p.source)}" target="_blank" rel="noopener noreferrer">Source</a>` : ''}</div>
-      <div class="settings-grid">${wattFields(it)}</div></div>
-      ${itemButtons(it)}
+      <button type="button" class="part-summary" data-expand="${it.uid}" data-uid="${it.uid}" aria-expanded="${open ? 'true' : 'false'}">
+        <b>${esc(labelOf(p, it))}${it.qty > 1 ? ' ×' + it.qty : ''}</b>
+        <span class="part-slot">${esc(slotLabel(it, build))}</span>
+        <span class="part-watts">${esc(rowWatts(it))}</span>
+      </button>
+      <div class="part-edit"${open ? '' : ' hidden'}>
+        <div class="part-meta">${whereText(it)}. ${wattsText(w.idle * (it.qty || 1))} idle, ${wattsText(w.typical * (it.qty || 1))} typical. <span class="badge${p?.edited ? ' edited' : ''}">${esc(badge(p))}</span>
+        ${p?.source ? `<a href="${esc(p.source)}" target="_blank" rel="noopener noreferrer">Source</a>` : ''}</div>
+        <div class="settings-grid">${wattFields(it)}</div>
+        ${itemButtons(it)}
+      </div>
     </article>`;
   }).join('') : '<p class="help">Nothing in this build yet. Add a part from the list, or load a starter.</p>';
 }
@@ -974,31 +1007,91 @@ function wire() {
     if (!e.target.dataset?.battery) return;
     renderUps(shown());
   });
-  document.body.addEventListener('click', e => {
-    const swap = e.target.closest('[data-swap]');
-    if (swap) { applySwap(swap.dataset.swap); return; }
-    if (shared && e.target.closest('[data-edit], [data-add], [data-act], #loadPreset, #newBuild, #sendCalc, #customPartForm button')) return previewToast();
-    const edit = e.target.closest('[data-edit]');
-    if (edit) { openEdit(edit.dataset.edit); return; }
-    const add = e.target.closest('[data-add]');
-    if (add) { addPart(add.dataset.add, add.dataset.where); return; }
-    const act = e.target.closest('[data-act]');
-    if (!act) return;
-    const item = findItem(act.dataset.uid);
+  const eventEl = event => {
+    const raw = event.target;
+    return raw instanceof Element ? raw : raw?.parentElement || null;
+  };
+  // pointerup does the move. The click that follows can land on a button the rebuild just created, which was putting the part straight back. A later tap is a new pointerdown, so it still counts.
+  let pointerAct = null;
+  let pointerHandled = false;
+  function keepPlace(uid) {
+    const y = window.scrollY;
+    const card = uid ? document.querySelector(`.shelf-item [data-uid="${CSS.escape(uid)}"]`)?.closest('.shelf-item') : null;
+    const top = card ? card.getBoundingClientRect().top : null;
+    const focused = document.activeElement;
+    if (focused instanceof HTMLElement && focused !== document.body) focused.blur();
+    return () => {
+      const next = uid ? document.querySelector(`.shelf-item [data-uid="${CSS.escape(uid)}"]`)?.closest('.shelf-item') : null;
+      if (next && top != null) window.scrollTo(0, window.scrollY + next.getBoundingClientRect().top - top);
+      else window.scrollTo(0, y);
+    };
+  }
+  function runItemAct(act) {
+    const id = act.dataset.uid;
+    const item = findItem(id);
     if (!item) return;
-    if (act.dataset.act === 'remove') active().items = active().items.filter(it => it !== item);
-    else if (act.dataset.act === 'shelf') { item.placement = 'shelf'; item.startU = null; item.ownSlot = false; }
-    else if (act.dataset.act === 'rack') {
+    const kind = act.dataset.act;
+    if (kind === 'up' || kind === 'down') {
+      const step = stepOf(active().width);
+      if (!Number.isFinite(item.startU)) return;
+      item.startU = roundU(item.startU + (kind === 'up' ? 1 : -1) * step);
+    } else if (kind === 'remove') active().items = active().items.filter(it => it !== item);
+    else if (kind === 'shelf') { item.placement = 'shelf'; item.startU = null; item.hostedBy = null; item.ownSlot = false; }
+    else if (kind === 'rack') {
       const part = partById(item.partId);
       item.placement = isZeroUFan(part) ? 'zerou' : (defaultPlacement(part, active().width) === 'frame' ? 'frame' : 'rack');
       item.startU = null;
       item.hostedBy = null;
       item.ownSlot = isShelfRider(part);
-    }
-    else if (act.dataset.act === 'up') nudge(item, 1);
-    else if (act.dataset.act === 'down') nudge(item, -1);
+    } else return;
+    const restore = keepPlace(kind === 'remove' ? '' : id);
     scheduleSave();
     render();
+    restore();
+    requestAnimationFrame(restore);
+  }
+  document.body.addEventListener('pointerdown', e => {
+    if (e.button != null && e.button !== 0) { pointerAct = null; pointerHandled = false; return; }
+    pointerAct = eventEl(e)?.closest('[data-act]') || null;
+    pointerHandled = false;
+  });
+  document.body.addEventListener('pointerup', e => {
+    if (e.button != null && e.button !== 0) return;
+    const act = eventEl(e)?.closest('[data-act]');
+    if (!act || act !== pointerAct || drag?.active) return;
+    pointerHandled = true;
+    if (shared) return previewToast();
+    runItemAct(act);
+  });
+  document.body.addEventListener('click', e => {
+    const down = pointerAct;
+    const handled = pointerHandled;
+    pointerAct = null;
+    pointerHandled = false;
+    const el = eventEl(e);
+    if (!el) return;
+    const expand = el.closest('[data-expand]');
+    if (expand && !el.closest('[data-act]')) {
+      const id = expand.dataset.expand;
+      if (openRows.has(id)) openRows.delete(id); else openRows.add(id);
+      const edit = expand.parentElement?.querySelector('.part-edit');
+      const open = openRows.has(id);
+      if (edit) edit.hidden = !open;
+      expand.setAttribute('aria-expanded', open ? 'true' : 'false');
+      return;
+    }
+    const swap = el.closest('[data-swap]');
+    if (swap) { applySwap(swap.dataset.swap); return; }
+    if (shared && el.closest('[data-edit], [data-add], [data-act], #loadPreset, #newBuild, #sendCalc, #customPartForm button')) return previewToast();
+    const edit = el.closest('[data-edit]');
+    if (edit) { openEdit(edit.dataset.edit); return; }
+    const add = el.closest('[data-add]');
+    if (add) { addPart(add.dataset.add, add.dataset.where); return; }
+    const act = el.closest('[data-act]');
+    if (!act) return;
+    if (down && act !== down) return;
+    if (handled) return;
+    runItemAct(act);
   });
   document.body.addEventListener('input', e => {
     const field = e.target.dataset?.field;

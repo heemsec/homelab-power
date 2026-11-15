@@ -8,7 +8,7 @@ const files = [
   'index.html', 'privacy.html', 'planner.html', 'settings.html',
   'styles.css', 'ui.css', 'math.js', 'share.js', 'regions.js', 'csv.js',
   'theme.js', 'version.js', 'app.js', 'entitlement.js', 'pro-core.js', 'pro.js',
-  'planner.js', 'settings.js', 'billing-ui.js', 'pwa.js', 'sw.js', 'manifest.webmanifest'
+  'planner.js', 'settings.js', 'subtabs.js', 'billing-ui.js', 'pwa.js', 'sw.js', 'manifest.webmanifest'
 ];
 for (const file of files) fs.copyFileSync(path.join(root, file), path.join(dest, file));
 fs.cpSync(path.join(root, 'icons'), path.join(dest, 'icons'), {recursive: true});
