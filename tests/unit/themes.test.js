@@ -13,10 +13,12 @@ function contrast(a, b) {
 }
 
 const pairs = [
-  ['homelab text', '#eff7f6', '#0b1215'],
-  ['homelab muted', '#a0b3b8', '#121e22'],
-  ['homelab button', '#16201a', '#b4ef86'],
-  ['homelab light button', '#ffffff', '#326319'],
+  ['homelab text', '#FFFFFF', '#0B1628'],
+  ['homelab muted', '#A9C4D8', '#12233A'],
+  ['homelab button', '#0B1628', '#7EC8F2'],
+  ['homelab light text', '#0B1628', '#F7FBFE'],
+  ['homelab light button', '#FFFFFF', '#316AD7'],
+  ['homelab navy on mid blue', '#0B1628', '#3D8FE0'],
   ['homelab light heavy', '#8a4b00', '#ffffff'],
   ['cyber text', '#E5E7EB', '#0B0F19'],
   ['cyber muted on card', '#9CA3AF', '#1F2937'],

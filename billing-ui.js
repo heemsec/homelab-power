@@ -72,7 +72,7 @@ function start(win){
  const upsell=doc.getElementById('proUpsell');
  if(upsell)upsell.textContent='More than one saved build, your own parts, a side-by-side compare, a PNG or CSV of the rack, and a backup file are part of Pro. Get Pro is on the calculator. The build you already have stays either way.';
  const palette=doc.getElementById('paletteUpsell');
- if(palette)palette.textContent='Nordic Server and Amber Terminal come with Pro. Get Pro is with your labs on the calculator. Until then the page stays on Homelab Green, and the pick is not forgotten.';
+ if(palette)palette.textContent='Nordic Server and Amber Terminal come with Pro. Get Pro is with your labs on the calculator. Until then the page stays on Sky Blue, and the pick is not forgotten.';
  if(profile&&!profile.querySelector('.billing-pro')){
   const bar=doc.createElement('div');bar.className='billing-pro';bar.id='billingBar';
   bar.innerHTML='<button id="buyPro" type="button"><span class="buy-name">Get Pro</span></button><button id="restorePurchases" type="button" class="quiet">Restore purchases</button><span id="supporterBadge" class="supporter-badge" hidden>Supporter</span>';

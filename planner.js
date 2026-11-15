@@ -723,7 +723,7 @@ function exportPng() {
   canvas.width = 900;
   canvas.height = rows * row + 120;
   const g = canvas.getContext('2d');
-  const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0b1215';
+  const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0B1628';
   const ink = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#eff7f6';
   g.fillStyle = bg; g.fillRect(0, 0, canvas.width, canvas.height);
   g.fillStyle = ink; g.font = '28px sans-serif';
