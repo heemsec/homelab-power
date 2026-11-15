@@ -65,6 +65,16 @@ test('import actions follow the Pro rules', () => {
   assert.equal(Share.interopAccess({pro: true, profiles: 3}).merge, 'pro');
 });
 
+test('sending to Notebook explains a failure in plain language', async () => {
+  const previous = global.document;
+  global.document = undefined;
+  await assert.rejects(
+    () => Share.sendToNotebook({v: 1, source: 'homelab-power', devices: [{name: 'Pi', idleW: 3, typicalW: 5}]}),
+    /Couldn't open Homelab Notebook/
+  );
+  global.document = previous;
+});
+
 test('an old planner link still round-trips', async () => {
   const build = {name: '8U 10" minilab', width: 10, heightU: 8, items: [{partId: 'lenovo-thinkcentre-m720q-tiny', qty: 1, placement: 'shelf', startU: null, idleOverride: null, typicalOverride: null, batteryWh: null, ownSlot: false}]};
   const back = await Share.decode(await Share.encode(build));

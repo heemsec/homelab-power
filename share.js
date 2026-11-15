@@ -1,5 +1,5 @@
 /* Build links live in the URL hash. No server, and nothing is fetched to make one. */
-(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.PowerShare=factory();})(typeof globalThis!=='undefined'?globalThis:this,function(){
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(root);else root.PowerShare=factory(root);})(typeof globalThis!=='undefined'?globalThis:this,function(root){
 'use strict';
 const PLACEMENTS=['rack','shelf','frame','zerou'];
 function b64url(bytes){
@@ -213,13 +213,16 @@ function interopAccess({pro,profiles}){
 async function sendToNotebook(payload){
  const token=await encodeInterop(payload);
  const url=NOTEBOOK_ORIGIN+token;
- if(typeof root.NativeOpenExternal==='function'){await root.NativeOpenExternal(url);return url;}
- if(root.document){
-  const link=root.document.createElement('a');
+ const host=root||globalThis;
+ try{
+  if(typeof host.NativeOpenExternal==='function'){await host.NativeOpenExternal(url);return url;}
+  const doc=host.document;
+  if(!doc||!doc.body)throw Error('no document');
+  const link=doc.createElement('a');
   link.href=url;link.target='_blank';link.rel='noopener noreferrer';
-  root.document.body.appendChild(link);link.click();link.remove();
- }
- return url;
+  doc.body.appendChild(link);link.click();link.remove();
+  return url;
+ }catch{throw Error('Couldn\'t open Homelab Notebook.');}
 }
 return {compact,sanitize,encode,decode,migrateMinilabName,isLegacyMinilabName,encodeInterop,decodeInterop,devicesFromInterop,circuitFromInterop,interopAccess,typeForCategory,sendToNotebook,NOTEBOOK_ORIGIN};
 });
