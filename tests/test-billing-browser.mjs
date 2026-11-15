@@ -56,7 +56,7 @@ const open = async (url, init, opts = {}) => {
   p.on('pageerror', e => errors.push(e.message));
   p.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await p.goto(url, { waitUntil: 'domcontentloaded' });
-  if (opts.wait === 'settings') await p.waitForSelector('#supportTitle', { state: 'attached' });
+  if (opts.wait === 'settings') { await p.waitForSelector('#supportTitle', { state: 'attached' }); await p.click('[data-subtab="pro"]'); }
   else if (opts.wait === 'planner') await p.waitForSelector('#rackTitle');
   else await p.waitForFunction(() => !!window.PowerApp);
   await p.waitForTimeout(200);
@@ -102,8 +102,14 @@ try {
   ok((await text(p, '#billingStatus')).includes('Pay once'), 'native: status copy');
   eq(((await text(p, '#profileCard')).match(/stays free/gi) || []).length, 1, 'calculator stays free is said once');
   ok(!(await text(p, '#profileCard')).includes('testing preview'), 'native: no preview wording in profile card');
+  await p.click('[data-subtab="whatif"]');
   ok((await text(p, '#compareCard')).includes('part of Pro'), 'native: lock copy swapped');
-  for (const sel of ['#exportCSV', '#share', '#add', '#rate']) eq(await visible(p, sel), true, 'native: free feature kept ' + sel);
+  await p.click('[data-subtab="devices"]');
+  eq(await visible(p, '#share'), true, 'native: free feature kept #share');
+  eq(await visible(p, '#add'), true, 'native: free feature kept #add');
+  await p.click('[data-subtab="costs"]');
+  for (const sel of ['#exportCSV', '#rate']) eq(await visible(p, sel), true, 'native: free feature kept ' + sel);
+  await p.click('[data-subtab="devices"]');
   await quiet(p);
   await p.screenshot({ path: `${shots}/pro_unlock_phone_3x.png` });
   ok(await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'phone: no sideways scroll');
@@ -227,6 +233,7 @@ try {
   ({ ctx, p } = await open(`${WWW}planner.html`, { state: { status: 'ready', prices, pro: false } }, { storage: { 'homelab-power-preview-pro': 'true' }, wait: 'planner' }));
   await p.waitForSelector('#previewPro', { state: 'attached' });
   await p.waitForTimeout(300);
+  await p.click('[data-subtab="parts"]');
   eq(await visible(p, '#previewPro'), false, 'planner: preview toggle hidden');
   eq(await p.evaluate(() => window.PowerEntitlement.hasPro()), false, 'planner: preview flag does not grant Pro');
   ok((await text(p, '#proUpsell')).includes('calculator'), 'planner: points at Get Pro on the calculator');
@@ -238,6 +245,7 @@ try {
   eq(await p.locator('#tip_small').count(), 0, 'unavailable calculator has no tip button');
   eq(await p.locator('#restorePurchases').isEnabled(), true, 'unavailable: restore can retry');
   eq(await proOpen(p), false, 'unavailable: locked');
+  await p.click('[data-subtab="costs"]');
   await p.locator('#rate').fill('0.5');
   await p.locator('#rate').blur();
   ok((await text(p, '#totals')).length > 10, 'unavailable: calculator still works');

@@ -41,6 +41,10 @@ function paint(s) {
   const swatch = document.querySelector(`input[name="palette"][value="${palette}"]`) || document.querySelector('input[name="palette"][value="homelab"]');
   if (swatch) swatch.checked = true;
   paintLocks();
+  if (window.HomelabSubtabs) {
+    window.HomelabSubtabs.setSummary('general', `${s.rate} ${s.currency}`);
+    window.HomelabSubtabs.setSummary('pro', 'Backup');
+  }
 }
 function collect() {
   const voltageMode = $('voltageMode').value;

@@ -271,6 +271,17 @@ function renderTotals(build) {
   $('typicalHeat').textContent = `${fmt(M.btuPerHour(t.typical), 1)} BTU/hr`;
   $('idleHeat').dataset.btu = String(M.btuPerHour(t.idle));
   $('typicalHeat').dataset.btu = String(M.btuPerHour(t.typical));
+  const head = $('buildHeading');
+  if (head) head.textContent = build.name || 'This build';
+  const meta = $('buildMeta');
+  if (meta) meta.textContent = `${build.width} inch · ${build.heightU}U`;
+  const tabs = window.HomelabSubtabs;
+  if (tabs) {
+    const n = build.items.length;
+    tabs.setSummary('rack', `${build.width} inch · ${build.heightU}U`);
+    tabs.setSummary('parts', n ? `${n} item${n === 1 ? '' : 's'}, ${wattsText(t.typical)} typical` : 'Nothing in yet');
+    tabs.setSummary('power', `${money(year, currency)} a year`);
+  }
 }
 
 function itemButtons(it) {
@@ -336,17 +347,39 @@ function whereText(it) {
   if (it.placement === 'shelf') return 'On a shelf';
   return `In the rack at ${it.startU}U`;
 }
+const openRows = new Set();
+function slotLabel(it, build) {
+  if (it.placement === 'frame') return 'Frame';
+  if (it.placement === 'zerou') return '0U';
+  if (it.hostedBy || it.placement === 'shelf') return 'Shelf';
+  if (it.overflow || !Number.isFinite(it.startU)) return 'No slot';
+  const step = stepOf(build.width);
+  const top = roundU(it.startU + step);
+  const bottom = roundU(it.startU + (it.units || step));
+  return Math.abs(top - bottom) < 0.01 ? `U${top}` : `U${top}–${bottom}`;
+}
+function rowWatts(it) {
+  const w = oneWatts(it).typical * (it.qty || 1);
+  return `${new Intl.NumberFormat(locale(), {maximumFractionDigits: 1}).format(w)} W`;
+}
 function renderItems(build) {
   const items = build.items;
   $('itemList').innerHTML = items.length ? items.map(it => {
     const p = partById(it.partId);
     const w = oneWatts(it);
+    const open = openRows.has(it.uid);
     return `<article class="shelf-item" data-drag="item:${it.uid}">
-      <div><b>${esc(labelOf(p, it))}${it.qty > 1 ? ' ×' + it.qty : ''}</b>
-      <div class="part-meta">${whereText(it)}. ${wattsText(w.idle * (it.qty || 1))} idle, ${wattsText(w.typical * (it.qty || 1))} typical. <span class="badge${p?.edited ? ' edited' : ''}">${esc(badge(p))}</span>
-      ${p?.source ? `<a href="${esc(p.source)}" target="_blank" rel="noopener noreferrer">Source</a>` : ''}</div>
-      <div class="settings-grid">${wattFields(it)}</div></div>
-      ${itemButtons(it)}
+      <button type="button" class="part-summary" data-expand="${it.uid}" data-uid="${it.uid}" aria-expanded="${open ? 'true' : 'false'}">
+        <b>${esc(labelOf(p, it))}${it.qty > 1 ? ' ×' + it.qty : ''}</b>
+        <span class="part-slot">${esc(slotLabel(it, build))}</span>
+        <span class="part-watts">${esc(rowWatts(it))}</span>
+      </button>
+      <div class="part-edit"${open ? '' : ' hidden'}>
+        <div class="part-meta">${whereText(it)}. ${wattsText(w.idle * (it.qty || 1))} idle, ${wattsText(w.typical * (it.qty || 1))} typical. <span class="badge${p?.edited ? ' edited' : ''}">${esc(badge(p))}</span>
+        ${p?.source ? `<a href="${esc(p.source)}" target="_blank" rel="noopener noreferrer">Source</a>` : ''}</div>
+        <div class="settings-grid">${wattFields(it)}</div>
+        ${itemButtons(it)}
+      </div>
     </article>`;
   }).join('') : '<p class="help">Nothing in this build yet. Add a part from the list, or load a starter.</p>';
 }
@@ -1037,6 +1070,16 @@ function wire() {
     pointerHandled = false;
     const el = eventEl(e);
     if (!el) return;
+    const expand = el.closest('[data-expand]');
+    if (expand && !el.closest('[data-act]')) {
+      const id = expand.dataset.expand;
+      if (openRows.has(id)) openRows.delete(id); else openRows.add(id);
+      const edit = expand.parentElement?.querySelector('.part-edit');
+      const open = openRows.has(id);
+      if (edit) edit.hidden = !open;
+      expand.setAttribute('aria-expanded', open ? 'true' : 'false');
+      return;
+    }
     const swap = el.closest('[data-swap]');
     if (swap) { applySwap(swap.dataset.swap); return; }
     if (shared && el.closest('[data-edit], [data-add], [data-act], #loadPreset, #newBuild, #sendCalc, #customPartForm button')) return previewToast();

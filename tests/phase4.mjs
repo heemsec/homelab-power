@@ -62,6 +62,7 @@ try {
   await page.evaluate(() => localStorage.setItem('homelab-power-preview-pro', 'true'));
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(200);
+  await page.click('[data-subtab="pro"]');
   const [download] = await Promise.all([page.waitForEvent('download'), page.click('#backup')]);
   const path = await download.path();
   const backup = JSON.parse(await (await import('node:fs')).promises.readFile(path, 'utf8'));

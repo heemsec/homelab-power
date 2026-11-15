@@ -125,6 +125,7 @@ function renderResults(){
  const sorted=[...items].sort((a,b)=>b.cost-a.cost),max=sorted[0]?.cost||1;
  $('breakdown').innerHTML=sorted.map(d=>`<div class="bar-item"><div class="bar-label"><span>${esc(d.name)}</span><span>${money(d.cost*365)} (${base.cost?number(d.cost/base.cost*100,0):0}%)</span></div><div class="bar-track"><div class="bar-fill" style="width:${d.cost/max*100}%"></div></div></div>`).join('')||'<p class="help">Costs land here once you\'ve added gear.</p>';
  const selected=state.devices.filter(d=>d.selected).length;$('selection').textContent=selected?`${selected} device${selected===1?'':'s'} checked`:'None checked';
+ const tabs=window.HomelabSubtabs; if(tabs){const n=state.devices.length; tabs.setSummary('devices', n?`${n} device${n===1?'':'s'}`:'No devices yet'); tabs.setSummary('costs', `${money(base.cost*365)} a year`); tabs.setSummary('whatif', 'Try a cheaper setup');}
  if(!selected){for(const id of ['shutdownResult','consolidateResult','replacementResult'])$(id).innerHTML='<span>Check at least one device if you want a comparison.</span>';return;}
  savingResult('shutdownResult',M.integrate(state.devices,state,{shutdown:true,offStart:state.offStart,offEnd:state.offEnd}),base);
  savingResult('consolidateResult',M.integrate(state.devices,state,{replacement:true,replacementWatts:state.consolidateWatts}),base);

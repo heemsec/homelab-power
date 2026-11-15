@@ -1,5 +1,9 @@
 # Homelab Power
 
+## What's new in 1.3.7
+
+The long pages are split into short tabs, so the rack, the parts, and the bill each get their own view. The home page has a short banner that says what the app is for.
+
 ## What's new in 1.3.5
 
 The everyday look is blue and white now. Sky Blue is the theme you get unless you pick another one. The mark in the header is two rack posts with a bolt between them, and the same blue shows up on buttons and on the word POWER. Cyber-Grid, Nordic Server, and Amber Terminal are still there if you liked them.
