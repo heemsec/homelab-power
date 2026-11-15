@@ -43,6 +43,32 @@ try {
   await page.click('[data-subtab="power"]');
   check(await page.evaluate(() => history.length) === history, 'switching tabs does not add a history entry');
   await page.close();
+
+  const calc = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await calc.goto(`${base}/index.html`, { waitUntil: 'domcontentloaded' });
+  await calc.waitForFunction(() => /Up to .+ a year/.test(document.querySelector('[data-sum="whatif"]')?.textContent || ''));
+  check((await calc.locator('[data-subtab="whatif"] > span').innerText()) === 'Save money', 'the calculator tab is called Save money');
+  check((await calc.locator('[data-subtab="whatif"]').getAttribute('data-subtab')) === 'whatif', 'the tab id stays whatif');
+  const summary = await calc.locator('[data-sum="whatif"]').innerText();
+  await calc.click('[data-subtab="whatif"]');
+  const best = await calc.locator('.scenario-result').evaluateAll(nodes => {
+    const amounts = nodes.filter(node => /You'd save/.test(node.textContent)).map(node => Number(node.querySelector('strong').textContent.replace(/[^0-9.-]/g, '')));
+    return Math.max(...amounts.filter(n => Number.isFinite(n)));
+  });
+  const shown = Number(summary.replace(/[^0-9.-]/g, ''));
+  check(Math.abs(shown - best) < 0.02, `Save money summary is the best yearly saving (${summary}, cards ${best})`);
+  check(!(await calc.locator('[data-panel="whatif"]').innerText()).includes('What-if'), 'the Save money panel does not say What-if');
+  check((await calc.locator('#compareCard .pro-lock').innerText()).includes('Save money cards'), 'the Pro note names the Save money cards');
+  await calc.click('[data-subtab="devices"]');
+  while (await calc.locator('#devices [data-key="selected"]:checked').count()) {
+    await calc.locator('#devices [data-key="selected"]:checked').first().uncheck();
+  }
+  await calc.waitForFunction(() => document.querySelector('[data-sum="whatif"]')?.textContent === 'Try a cheaper setup');
+  check(true, 'with nothing checked, the summary falls back');
+  await calc.evaluate(() => localStorage.setItem('homelab-power-subtab-calculator', 'whatif'));
+  await calc.reload({ waitUntil: 'domcontentloaded' });
+  check(await calc.locator('[data-panel="whatif"]').isVisible(), 'a saved whatif tab still opens Save money');
+  await calc.close();
 } catch (error) {
   console.error(error);
   failures.push(error.stack || String(error));

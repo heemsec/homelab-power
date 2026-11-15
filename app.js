@@ -76,7 +76,7 @@ function renderTou(){const extra=$('touExtra');if(!extra)return;extra.hidden=!st
 function toggleRates(){$('flatField').hidden=state.tou;document.querySelectorAll('.touField').forEach(el=>el.hidden=!state.tou);renderTou();}
 function deviceInput(d,key,label,max,step='1'){return `<input data-id="${d.id}" data-key="${key}" aria-label="${esc(label)} for ${esc(d.name)}" type="text" inputmode="decimal" data-min="0" data-max="${max}" value="${d[key]}">`;}
 function renderDevices(){
- $('devices').innerHTML=state.devices.map(d=>`<tr><td><input data-id="${d.id}" data-key="selected" type="checkbox" aria-label="Include ${esc(d.name)} in the what-ifs" ${d.selected?'checked':''}></td><td><input data-id="${d.id}" data-key="name" aria-label="Name of this device" type="text" maxlength="100" value="${esc(d.name)}"></td><td>${deviceInput(d,'idle','Idle watts',100000,'.1')}</td><td>${deviceInput(d,'load','Load watts',100000,'.1')}</td><td>${deviceInput(d,'loadPct','Percent of time at load',100,'.1')}</td><td>${deviceInput(d,'hours','Hours on per day',24,'.5')}</td><td>${deviceInput(d,'start','Hour it starts',23.99,'.5')}</td><td class="avg" id="avg-${d.id}">${number(M.watts(d),1)}</td><td><button class="remove" data-remove="${d.id}" aria-label="Remove ${esc(d.name)}">×</button></td></tr>`).join('')||'<tr><td colspan="9" class="help">Nothing here yet. Add a preset, or start with a blank device.</td></tr>';
+ $('devices').innerHTML=state.devices.map(d=>`<tr><td><input data-id="${d.id}" data-key="selected" type="checkbox" aria-label="Include ${esc(d.name)} in Save money" ${d.selected?'checked':''}></td><td><input data-id="${d.id}" data-key="name" aria-label="Name of this device" type="text" maxlength="100" value="${esc(d.name)}"></td><td>${deviceInput(d,'idle','Idle watts',100000,'.1')}</td><td>${deviceInput(d,'load','Load watts',100000,'.1')}</td><td>${deviceInput(d,'loadPct','Percent of time at load',100,'.1')}</td><td>${deviceInput(d,'hours','Hours on per day',24,'.5')}</td><td>${deviceInput(d,'start','Hour it starts',23.99,'.5')}</td><td class="avg" id="avg-${d.id}">${number(M.watts(d),1)}</td><td><button class="remove" data-remove="${d.id}" aria-label="Remove ${esc(d.name)}">×</button></td></tr>`).join('')||'<tr><td colspan="9" class="help">Nothing here yet. Add a preset, or start with a blank device.</td></tr>';
 }
 function savingResult(id,scenario,baseline,extra=''){
  const delta=baseline.cost-scenario.cost;
@@ -124,15 +124,22 @@ function renderResults(){
  $('costRows').innerHTML=items.map(d=>`<tr><td>${esc(d.name)}</td>${periods.map(([,days])=>`<td>${money(d.cost*days)}<span>${number(d.kwh*days)} kWh</span></td>`).join('')}</tr>`).join('')||'<tr><td colspan="4">Add a device and its cost shows up here.</td></tr>';
  const sorted=[...items].sort((a,b)=>b.cost-a.cost),max=sorted[0]?.cost||1;
  $('breakdown').innerHTML=sorted.map(d=>`<div class="bar-item"><div class="bar-label"><span>${esc(d.name)}</span><span>${money(d.cost*365)} (${base.cost?number(d.cost/base.cost*100,0):0}%)</span></div><div class="bar-track"><div class="bar-fill" style="width:${d.cost/max*100}%"></div></div></div>`).join('')||'<p class="help">Costs land here once you\'ve added gear.</p>';
- const selected=state.devices.filter(d=>d.selected).length;$('selection').textContent=selected?`${selected} device${selected===1?'':'s'} checked`:'None checked';
- const tabs=window.HomelabSubtabs; if(tabs){const n=state.devices.length; tabs.setSummary('devices', n?`${n} device${n===1?'':'s'}`:'No devices yet'); tabs.setSummary('costs', `${money(base.cost*365)} a year`); tabs.setSummary('whatif', 'Try a cheaper setup');}
- if(!selected){for(const id of ['shutdownResult','consolidateResult','replacementResult'])$(id).innerHTML='<span>Check at least one device if you want a comparison.</span>';return;}
- savingResult('shutdownResult',M.integrate(state.devices,state,{shutdown:true,offStart:state.offStart,offEnd:state.offEnd}),base);
- savingResult('consolidateResult',M.integrate(state.devices,state,{replacement:true,replacementWatts:state.consolidateWatts}),base);
- const replacement=M.integrate(state.devices,state,{replacement:true,replacementWatts:state.replacementWatts});
- const payback=M.payback(state.price,base.cost-replacement.cost);
- const paybackText=payback===null?'Energy savings never cover this':state.price===0?'Nothing to buy, so it\'s paid for now':`Pays for itself in ${number(payback,1)} months (${number(payback/12,1)} ${number(payback/12,1)==='1'?'year':'years'})`;
- savingResult('replacementResult',replacement,base,`<span>${paybackText}</span>`);
+  const selected=state.devices.filter(d=>d.selected).length;$('selection').textContent=selected?`${selected} device${selected===1?'':'s'} checked`:'None checked';
+  let saveSummary='Try a cheaper setup';
+  if(!selected){for(const id of ['shutdownResult','consolidateResult','replacementResult'])$(id).innerHTML='<span>Check at least one device if you want a comparison.</span>';}
+  else{
+    const shutdown=M.integrate(state.devices,state,{shutdown:true,offStart:state.offStart,offEnd:state.offEnd});
+    const consolidate=M.integrate(state.devices,state,{replacement:true,replacementWatts:state.consolidateWatts});
+    const replacement=M.integrate(state.devices,state,{replacement:true,replacementWatts:state.replacementWatts});
+    const best=Math.max(base.cost-shutdown.cost,base.cost-consolidate.cost,base.cost-replacement.cost)*365;
+    if(best>0.005)saveSummary=`Up to ${money(best)} a year`;
+    savingResult('shutdownResult',shutdown,base);
+    savingResult('consolidateResult',consolidate,base);
+    const payback=M.payback(state.price,base.cost-replacement.cost);
+    const paybackText=payback===null?'Energy savings never cover this':state.price===0?'Nothing to buy, so it\'s paid for now':`Pays for itself in ${number(payback,1)} months (${number(payback/12,1)} ${number(payback/12,1)==='1'?'year':'years'})`;
+    savingResult('replacementResult',replacement,base,`<span>${paybackText}</span>`);
+  }
+  const tabs=window.HomelabSubtabs; if(tabs){const n=state.devices.length; tabs.setSummary('devices', n?`${n} device${n===1?'':'s'}`:'No devices yet'); tabs.setSummary('costs', `${money(base.cost*365)} a year`); tabs.setSummary('whatif', saveSummary);}
 }
 const topLimits={rate:[0,1000],offRate:[0,1000],peakRate:[0,1000],peakStart:[0,23.99],peakEnd:[0,23.99],offStart:[0,23.99],offEnd:[0,23.99],consolidateWatts:[0,100000],replacementWatts:[0,100000],price:[0,1e9]};
 for(const [key,[min,max]] of Object.entries(topLimits)){
@@ -152,7 +159,7 @@ $('exampleShoulder').addEventListener('click',()=>usePeriods([{id:'peak',name:'P
 $('preset').addEventListener('change',()=>{$('driveLabel').hidden=$('preset').value!=='nas';});
 $('add').addEventListener('click',()=>{if(state.devices.length>=100){toast('100 devices is the cap.');return;}state.devices.push(makeDevice($('preset').value));renderDevices();renderResults();persist();$('devices').querySelector('tr:last-child [data-key="name"]').focus();});
 const deviceMax={idle:100000,load:100000,loadPct:100,hours:24,start:23.99};
-$('devices').addEventListener('input',e=>{const el=e.target,d=state.devices.find(d=>d.id===el.dataset.id);if(!d)return;const key=el.dataset.key;if(key==='name'){d.name=el.value.slice(0,100);const row=el.closest('tr');row.querySelector('[data-key="selected"]').setAttribute('aria-label',`Include ${d.name} in the what-ifs`);row.querySelector('[data-remove]').setAttribute('aria-label',`Remove ${d.name}`);for(const input of row.querySelectorAll('[inputmode="decimal"]')){const title={idle:'Idle watts',load:'Load watts',loadPct:'Percent of time at load',hours:'Hours on per day',start:'Hour it starts'}[input.dataset.key];input.setAttribute('aria-label',`${title} for ${d.name}`);}}else if(key==='selected')d.selected=el.checked;else if(key in deviceMax)d[key]=num(el.value,0,deviceMax[key]);else return;$(`avg-${d.id}`).textContent=number(M.watts(d),1);renderResults();persist();});
+$('devices').addEventListener('input',e=>{const el=e.target,d=state.devices.find(d=>d.id===el.dataset.id);if(!d)return;const key=el.dataset.key;if(key==='name'){d.name=el.value.slice(0,100);const row=el.closest('tr');row.querySelector('[data-key="selected"]').setAttribute('aria-label',`Include ${d.name} in Save money`);row.querySelector('[data-remove]').setAttribute('aria-label',`Remove ${d.name}`);for(const input of row.querySelectorAll('[inputmode="decimal"]')){const title={idle:'Idle watts',load:'Load watts',loadPct:'Percent of time at load',hours:'Hours on per day',start:'Hour it starts'}[input.dataset.key];input.setAttribute('aria-label',`${title} for ${d.name}`);}}else if(key==='selected')d.selected=el.checked;else if(key in deviceMax)d[key]=num(el.value,0,deviceMax[key]);else return;$(`avg-${d.id}`).textContent=number(M.watts(d),1);renderResults();persist();});
 $('devices').addEventListener('change',e=>{const el=e.target,d=state.devices.find(d=>d.id===el.dataset.id);if(d&&el.dataset.key in deviceMax)el.value=d[el.dataset.key];});
 $('devices').addEventListener('click',e=>{const button=e.target.closest('[data-remove]');if(!button)return;const index=state.devices.findIndex(d=>d.id===button.dataset.remove);state.devices=state.devices.filter(d=>d.id!==button.dataset.remove);renderDevices();renderResults();persist();const buttons=$('devices').querySelectorAll('[data-remove]');(buttons[Math.min(index,buttons.length-1)]||$('add')).focus();});
 $('reset').addEventListener('click',()=>{if(!confirm('Swap this for the demo devices and the default rates?'))return;state=defaults();renderInputs();persist();toast('Demo\'s loaded again.');});

@@ -8,7 +8,7 @@ The long pages are split into short tabs, so the rack, the parts, and the bill e
 
 The everyday look is blue and white now. Sky Blue is the theme you get unless you pick another one. The mark in the header is two rack posts with a bolt between them, and the same blue shows up on buttons and on the word POWER. Cyber-Grid, Nordic Server, and Amber Terminal are still there if you liked them.
 
-A calculator for what a homelab costs to leave running. Add the gear, type a rate or start from a published average, and you get energy and cost for a day, a month, and a year. What-if cards cover downtime, stuffing several machines onto one host, and how long an upgrade takes to pay for itself.
+A calculator for what a homelab costs to leave running. Add the gear, type a rate or start from a published average, and you get energy and cost for a day, a month, and a year. The Save money tab covers downtime, stuffing several machines onto one host, and how long an upgrade takes to pay for itself.
 
 The parts list and starter builds live in `data/parts.json` and `data/presets.json`. Where those numbers came from, including the November 2026 accuracy pass, is in [data/SOURCES.md](data/SOURCES.md).
 
