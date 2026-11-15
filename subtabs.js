@@ -10,6 +10,7 @@
   const known = new Set(buttons.map(b => b.dataset.subtab));
   let saved = '';
   try { saved = localStorage.getItem(key) || ''; } catch {}
+  if (page === 'calculator' && saved === 'whatif') saved = 'costs';
   if (!known.has(saved)) saved = buttons[0]?.dataset.subtab || '';
 
   function show(id, store) {

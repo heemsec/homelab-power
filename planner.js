@@ -279,7 +279,7 @@ function renderTotals(build) {
   if (tabs) {
     const n = build.items.length;
     tabs.setSummary('rack', `${build.width} inch · ${build.heightU}U`);
-    tabs.setSummary('parts', n ? `${n} item${n === 1 ? '' : 's'}, ${wattsText(t.typical)} typical` : 'Nothing in yet');
+    tabs.setSummary('parts', n ? `${n} item${n === 1 ? '' : 's'} · ${Math.round(t.typical)} W` : 'Nothing in yet');
     tabs.setSummary('power', `${money(year, currency)} a year`);
   }
 }

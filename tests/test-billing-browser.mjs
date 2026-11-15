@@ -102,7 +102,7 @@ try {
   ok((await text(p, '#billingStatus')).includes('Pay once'), 'native: status copy');
   eq(((await text(p, '#profileCard')).match(/stays free/gi) || []).length, 1, 'calculator stays free is said once');
   ok(!(await text(p, '#profileCard')).includes('testing preview'), 'native: no preview wording in profile card');
-  await p.click('[data-subtab="whatif"]');
+  await p.click('[data-subtab="costs"]');
   ok((await text(p, '#compareCard')).includes('part of Pro'), 'native: lock copy swapped');
   await p.click('[data-subtab="devices"]');
   eq(await visible(p, '#share'), true, 'native: free feature kept #share');

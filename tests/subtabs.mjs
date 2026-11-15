@@ -42,33 +42,51 @@ try {
   const history = await page.evaluate(() => history.length);
   await page.click('[data-subtab="power"]');
   check(await page.evaluate(() => history.length) === history, 'switching tabs does not add a history entry');
+  await page.click('[data-subtab="parts"]');
+  const partsSummary = await page.locator('[data-sum="parts"]').innerText();
+  check(/^8 items · \d+ W$/.test(partsSummary), `parts summary stays on one short line (${partsSummary})`);
+  await tabsLineUp(page, 'planner phone');
   await page.close();
+
+  async function tabsLineUp(target, label) {
+    const report = await target.evaluate(() => {
+      const buttons = [...document.querySelectorAll('.subtabs button')];
+      const heights = buttons.map(button => Math.round(button.getBoundingClientRect().height));
+      const tops = buttons.map(button => Math.round(button.querySelector('span').getBoundingClientRect().top));
+      const lines = [...document.querySelectorAll('.subtabs small')].map(node => node.getClientRects().length);
+      return { heights, tops, lines, count: buttons.length };
+    });
+    check(new Set(report.heights).size === 1, `${label}: tabs share a height (${report.heights.join(', ')})`);
+    check(new Set(report.tops).size === 1, `${label}: labels share a baseline (${report.tops.join(', ')})`);
+    check(report.lines.every(n => n === 1), `${label}: each summary is one line (${report.lines.join(', ')})`);
+    return report.count;
+  }
 
   const calc = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await calc.goto(`${base}/index.html`, { waitUntil: 'domcontentloaded' });
-  await calc.waitForFunction(() => /Up to .+ a year/.test(document.querySelector('[data-sum="whatif"]')?.textContent || ''));
-  check((await calc.locator('[data-subtab="whatif"] > span').innerText()) === 'Save money', 'the calculator tab is called Save money');
-  check((await calc.locator('[data-subtab="whatif"]').getAttribute('data-subtab')) === 'whatif', 'the tab id stays whatif');
-  const summary = await calc.locator('[data-sum="whatif"]').innerText();
-  await calc.click('[data-subtab="whatif"]');
-  const best = await calc.locator('.scenario-result').evaluateAll(nodes => {
-    const amounts = nodes.filter(node => /You'd save/.test(node.textContent)).map(node => Number(node.querySelector('strong').textContent.replace(/[^0-9.-]/g, '')));
-    return Math.max(...amounts.filter(n => Number.isFinite(n)));
-  });
-  const shown = Number(summary.replace(/[^0-9.-]/g, ''));
-  check(Math.abs(shown - best) < 0.02, `Save money summary is the best yearly saving (${summary}, cards ${best})`);
-  check(!(await calc.locator('[data-panel="whatif"]').innerText()).includes('What-if'), 'the Save money panel does not say What-if');
-  check((await calc.locator('#compareCard .pro-lock').innerText()).includes('Save money cards'), 'the Pro note names the Save money cards');
-  await calc.click('[data-subtab="devices"]');
-  while (await calc.locator('#devices [data-key="selected"]:checked').count()) {
-    await calc.locator('#devices [data-key="selected"]:checked').first().uncheck();
-  }
-  await calc.waitForFunction(() => document.querySelector('[data-sum="whatif"]')?.textContent === 'Try a cheaper setup');
-  check(true, 'with nothing checked, the summary falls back');
+  await calc.waitForSelector('#whatTitle', { state: 'attached' });
+  check(await calc.locator('[data-subtab="whatif"]').count() === 0, 'the calculator has no third tab');
+  check(await tabsLineUp(calc, 'calculator phone') === 2, 'the calculator has Devices and Costs');
+  await calc.click('[data-subtab="costs"]');
+  check(await calc.locator('#whatTitle').isVisible(), 'ways to save sits on Costs');
+  check((await calc.locator('#whatTitle').innerText()) === 'Ways to save', 'the section heading is Ways to save');
+  check((await calc.locator('#compareCard .pro-lock').innerText()).includes('ways to save'), 'the Pro note still points at the free cards');
   await calc.evaluate(() => localStorage.setItem('homelab-power-subtab-calculator', 'whatif'));
   await calc.reload({ waitUntil: 'domcontentloaded' });
-  check(await calc.locator('[data-panel="whatif"]').isVisible(), 'a saved whatif tab still opens Save money');
+  check(await calc.locator('[data-panel="costs"]').isVisible(), 'a saved whatif tab opens Costs');
+  check(await calc.locator('[data-subtab="costs"]').getAttribute('aria-selected') === 'true', 'Costs is the selected tab');
   await calc.close();
+
+  const fold = await browser.newPage({ viewport: { width: 673, height: 841 } });
+  await fold.goto(`${base}/planner.html`, { waitUntil: 'domcontentloaded' });
+  await fold.waitForSelector('[data-sum="parts"]');
+  await tabsLineUp(fold, 'planner fold');
+  await fold.goto(`${base}/settings.html`, { waitUntil: 'domcontentloaded' });
+  await fold.waitForSelector('[data-subtab="pro"]');
+  await tabsLineUp(fold, 'settings fold');
+  await fold.setViewportSize({ width: 390, height: 844 });
+  await tabsLineUp(fold, 'settings phone');
+  await fold.close();
 } catch (error) {
   console.error(error);
   failures.push(error.stack || String(error));
