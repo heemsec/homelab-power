@@ -36,9 +36,18 @@ function compact(build){
  if(Array.isArray(build.periods)&&build.periods.length)out.p=build.periods;
  return out;
 }
+const MINILAB_NAME='8U 10" minilab';
+const MINILAB_PRESET='nicks-8u-minilab';
+function isLegacyMinilabName(name){
+ return /^Nick['\u2018\u2019\u02BC\u2032]s 8U 10["\u201C\u201D\u2033\u2032] minilab$/.test(String(name??'').trim());
+}
+function migrateMinilabName(name, presetId){
+ if(presetId&&presetId!==MINILAB_PRESET)return name;
+ return isLegacyMinilabName(name)?MINILAB_NAME:name;
+}
 function sanitize(raw){
  if(!raw||typeof raw!=='object'||Array.isArray(raw)||raw.v!==1)throw Error('This link is not a build.');
- const name=String(raw.n??'Shared build').replace(/[<>]/g,'').slice(0,60)||'Shared build';
+ const name=migrateMinilabName(String(raw.n??'Shared build').replace(/[<>]/g,'').slice(0,60)||'Shared build');
  const width=raw.w===19?19:10;
  const height=num(raw.h,1,52);
  if(height==null)throw Error('The rack height in that link is missing.');
@@ -92,5 +101,5 @@ async function decode(token){
  catch{throw Error('That link is damaged.');}
  return sanitize(raw);
 }
-return {compact,sanitize,encode,decode};
+return {compact,sanitize,encode,decode,migrateMinilabName,isLegacyMinilabName};
 });
