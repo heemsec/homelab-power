@@ -25,7 +25,7 @@
   function resolvePalette() {
     return PRO.has(palette) && !entitled() ? 'homelab' : palette;
   }
-  const bar = {homelab: {dark: '#0b1215', light: '#f3f6f5'}, cyber: {dark: '#0B0F19', light: '#F3F6FB'}, nordic: {dark: '#0F172A', light: '#F8FAFC'}, amber: {dark: '#121212', light: '#FAFAF9'}};
+  const bar = {homelab: {dark: '#0B1628', light: '#F7FBFE'}, cyber: {dark: '#0B0F19', light: '#F3F6FB'}, nordic: {dark: '#0F172A', light: '#F8FAFC'}, amber: {dark: '#121212', light: '#FAFAF9'}};
   function apply() {
     const theme = resolveMode();
     const shown = resolvePalette();

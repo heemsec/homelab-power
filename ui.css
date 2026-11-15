@@ -91,7 +91,15 @@ body.is-dragging{cursor:grabbing;user-select:none}
  .page-intro h1{font-size:32px;letter-spacing:-1px}
 }
 
-/* Palettes. Homelab Green is the default in styles.css. These override it. */
+/* Palettes. Sky Blue is the default in styles.css. These override it. */
+.brand-banner{display:flex;align-items:center;gap:10px;height:36px;margin:12px 0 0;padding:0 12px;border-radius:10px;background:#3D8FE0;color:#0B1628;width:max-content;max-width:100%}
+.brand-banner svg{width:24px;height:24px;display:block;flex:none}
+.brand-banner span{font-size:12px;letter-spacing:1.6px;font-weight:650;line-height:1}
+.brand-banner + .hero{padding-top:24px}
+.brand-banner + .page-intro{padding-top:12px}
+:root[data-palette="cyber"] .brand-banner,:root[data-palette="nordic"] .brand-banner,:root[data-palette="amber"] .brand-banner{background:var(--accent);color:var(--accent-ink)}
+:root[data-palette="cyber"],:root[data-palette="nordic"],:root[data-palette="amber"]{--note:#18282a;--track:#26383b;--measure:#17272b;--measure-line:#30494d;--total-last:#213123;--total-last-line:#536a3c;--ok-bg:#142226}
+:root[data-palette="cyber"][data-theme="light"],:root[data-palette="nordic"][data-theme="light"],:root[data-palette="amber"][data-theme="light"]{--note:#edf4f1;--track:#d5e1dc;--measure:#e5f0ed;--measure-line:#acbfba;--total-last:#e9f2df;--total-last-line:#86a873;--ok-bg:#eaf2ef}
 input:not([type=checkbox]),select{background:var(--input);border-color:var(--input-line);color:var(--text)}
 button{background:var(--accent);color:var(--accent-ink)}
 button.secondary{background:var(--secondary-bg);color:var(--secondary-ink);border-color:var(--secondary-line)}
