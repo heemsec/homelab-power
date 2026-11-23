@@ -131,7 +131,9 @@ Category map used by Notebook: `sbc` → `pi`, `nas` → `nas`, `switch` → `sw
 
 Notebook builds a Power calculator `normalize()`-compatible state (`version: 1`,
 USD, $0.20/kWh, the lab's voltage and breaker, and one selected device per
-wall-power host) and opens:
+wall-power host). A host with watts but no saved hours is sent as 24 hours per
+day, matching the on-screen lab summary. Explicit `hours: 0` is left as 0. It
+opens:
 
 ```
 https://heemsec.github.io/homelab-power/#s=<base64url-json>
@@ -225,3 +227,203 @@ that have no match. Matching order: `id` / `powerId` first, then
 Peak wall-power load is compared to `voltage × breaker × 0.8`. Default circuit
 is 120 V / 15 A (or 230 V / 16 A). Guests (VM / LXC with a parent) are left
 out of the total.
+
+## `#p=` payload (version 2)
+
+Version 2 is a backward-compatible extension of version 1. A reader that
+understands only v1 should still use the v1 device and circuit fields, and
+must ignore unknown keys. A reader that understands v2 accepts `v` equal to
+`1` or `2`. Notebook emits `v: 1` by default so current Homelab Power builds
+will accept the link. Extra v2 fields may still appear on a v1 payload;
+unknown keys should be ignored. Emitting `v: 2` is behind `EMIT_INTEROP_V2`
+(or `toInterop(lab, name, source, { v2: true })`) and should stay off until
+Power's reader is approved to accept version 2. Existing `v: 1` links stay
+valid. Notebook continues to parse both `v: 1` and `v: 2`.
+
+```json
+{
+  "v": 2,
+  "source": "homelab-notebook",
+  "name": "Small home lab",
+  "voltageMode": "120",
+  "voltage": 120,
+  "breaker": 15,
+  "rate": 0.2,
+  "touEnabled": false,
+  "peakRate": 0.35,
+  "offRate": 0.15,
+  "peakStart": 16,
+  "peakEnd": 21,
+  "updatedAt": "2026-11-15T20:00:00.000Z",
+  "devices": [
+    {
+      "id": "host-pve1",
+      "name": "pve1",
+      "type": "proxmox-node",
+      "partId": "beelink-eq12-n100",
+      "idleW": 8,
+      "typicalW": 35,
+      "qty": 1,
+      "ip": "192.168.1.10",
+      "mac": "bc:24:11:00:00:0a",
+      "updatedAt": "2026-11-10",
+      "linked": true
+    }
+  ],
+  "ups": [
+    {
+      "id": "u1",
+      "name": "rack-ups",
+      "model": "Sample 1500",
+      "va": 1500,
+      "watts": 900,
+      "batteryWh": 150,
+      "hostIds": ["host-pve1"]
+    }
+  ],
+  "upgrade": {
+    "hostId": "host-pve1",
+    "name": "pve1",
+    "currentW": 13.4,
+    "newW": 8,
+    "price": 200,
+    "rate": 0.2,
+    "hours": 24
+  }
+}
+```
+
+### New and clarified v2 fields
+
+| Field | Required | Notes |
+|---|---|---|
+| `v` | yes | `1` or `2`. Reject anything else. |
+| `rate` | no | Lab electricity rate, dollars per kWh. Default `0.2`. |
+| `touEnabled`, `peakRate`, `offRate`, `peakStart`, `peakEnd` | no | Time-of-use schedule. Hours are 0–24, start inclusive, end exclusive. A window may wrap midnight (`22`–`6`). |
+| `updatedAt` | no | When the sending lab last changed, ISO-8601. |
+| `devices[].id` | yes, when known | **Stable id.** Keep this for the life of the host/device. Notebook sends the host id. Power should persist it and send it back as `id` (Notebook stores the Power-side value on `host.powerId`). |
+| `devices[].updatedAt` | no | When that host last changed. |
+| `devices[].linked` | no | `true` when the sender already treats this row as linked across the two apps. |
+| `ups` | no | UPS entries. `batteryWh` is usable as Watt-hours of the battery pack (not VA). `hostIds` lists stable device ids on that UPS. |
+| `upgrade` | no | One replacement scenario. Present only when the user sends an upgrade plan, not on a normal device-list sync. |
+
+VMs and LXC guests with a parent still must not be counted as wall-power load
+in either app. They may appear in a `#p=` inventory list so names and ids stay
+in sync; they must stay out of `#s=` calculator totals.
+
+## What Power should implement for v2
+
+Do this in the Homelab Power repo. Notebook already implements its half.
+Do not treat this list as already shipped in Power.
+
+### 1. Single device list sync
+
+- Persist a stable id on every calculator device (`devices[].id`). Do not
+  mint a new id on each send if the device already has one.
+- After a successful send or import, mark those devices as linked to
+  Notebook (and persist the Notebook host id when you have it).
+- After the first send, fingerprint the current device list (id, name, type,
+  idle, typical). When the list later differs, show
+  **“N devices changed, update Notebook?”** (or “update Power?” on the
+  Notebook side — Notebook already does this).
+- The send itself stays **free**. Re-sending to update a previously linked
+  device list is **Pro**, same as the v1 re-sync rule.
+- When emitting or accepting `#p=`, include `id` and `updatedAt` on each
+  device. Accept `v: 1` and `v: 2`.
+
+### 2. UPS
+
+- Let a lab store UPS entries: name, model, VA, watt rating, and battery
+  Watt-hours.
+- Assign wall-power devices to a UPS.
+- Estimated runtime (free in both apps):
+
+  ```
+  hours = (batteryWh × usableFraction × inverterEfficiency) / loadWatts
+  ```
+
+  Default `usableFraction` to `0.8` and `inverterEfficiency` to `0.9`.
+  `loadWatts` is the sum of assigned hosts' average watts. Show this number
+  for free.
+- Optional per-device shutdown order. A printable shutdown plan (order,
+  host, estimated runtime) is **Pro** in Notebook as part of the disaster
+  recovery card. Power should treat a printable shutdown plan the same way
+  if it adds one: free runtime math, Pro for the printable plan.
+- `#p=` v2 may include the `ups` array. Import it when present; ignore it
+  if the current Power build has no UPS UI yet.
+
+### 3. Cost per service
+
+- Notebook splits a host's watts across its services (and child VMs/LXCs)
+  either equally or by an optional `costWeight`, then shows $/month at the
+  lab's rate.
+- The lab rate setting (default `$0.20/kWh`) and the per-service cost
+  display are **free**.
+- Power already has a lab rate. When Power sends `#p=`, include `rate`.
+  When Power accepts `#p=`, apply `rate` if the user doesn't already have
+  one set. Power does not need a full per-service inventory; if it has no
+  services, it can skip this UI.
+
+### 4. Power waste flags and time-of-use rates
+
+- Flag a wall-power device whose idle watts are high for its type
+  (Notebook uses more than 2× the type's typical idle, and above 15 W).
+- Flag low-utilization devices (load ≤ 5% or on ≤ 4 hours/day) that could
+  be consolidated.
+- Accept a peak / off-peak schedule (`touEnabled`, `peakStart`, `peakEnd`,
+  `peakRate`, `offRate`) on `#p=` v2. Show whether backup or heavy-job
+  hours fall in the peak window, and recommend the off-peak window.
+- These flags and the TOU advice are **free**.
+
+### 5. Lab health score
+
+- Notebook computes a 0–100 lab health score (Pro) from exposure, patch/EOL
+  age, backup/restore status, certificate expiry, and monthly cost, and
+  shows a breakdown.
+- Power does not have exposure, patch, or certificate data. Power should
+  **not** invent a parallel score from watts alone. If a later Power build
+  wants to display a score received from Notebook, reserve a future `#p=`
+  field for it; nothing is required in Power for v2 beyond ignoring
+  unknown keys.
+
+### 6. Upgrade planner
+
+- Notebook can price a replacement per host: new watts + purchase price →
+  payback months at the lab rate (`paybackMonths = price / monthlySavings`,
+  where savings use the same hours/day and kWh math as the calculator).
+- Sending that scenario to Power is a **free** one-way send, even if the
+  lab was previously linked. It is not a re-sync of the live device list.
+- Power should accept `#p=` v2 with an `upgrade` object and show a
+  comparison (current watts vs `newW`, price, payback) without replacing
+  the live lab until the user chooses to apply it. Ignore `upgrade` if the
+  current Power build has no planner UI yet.
+
+## Encrypted Notebook links (`#e=`)
+
+Encrypted Notebook share links and backups use `#e=` with the same `j.` /
+`z.` + base64url wrapping as `#n=` / `#p=`. The decoded JSON is a versioned
+envelope, not a lab:
+
+```json
+{
+  "v": 1,
+  "app": "homelab-notebook",
+  "kind": "share",
+  "alg": "PBKDF2-SHA256-AES-GCM",
+  "iter": 310000,
+  "salt": "<base64url>",
+  "iv": "<base64url>",
+  "ct": "<base64url>"
+}
+```
+
+`kind` is `"share"` or `"backup"`. Key stretching is PBKDF2-SHA256 with at
+least 310,000 iterations; the cipher is AES-GCM. Salt and IV are random.
+Power does not need to open `#e=` links. If a user pastes one into Power,
+show a clear error that the link is an encrypted Notebook file.
+
+## Entitlement reminder (unchanged)
+
+Send stays free. Merge and re-sync of previously linked devices stay Pro
+in the app that performs them. The upgrade-scenario send is free.
+Pro in one app must not require Pro in the other.

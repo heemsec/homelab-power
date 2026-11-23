@@ -1,5 +1,9 @@
 # Homelab Power
 
+## What's new in 1.4.0
+
+A lab from Homelab Notebook still opens if the link is the older kind, and the newer kind opens too. Send to Notebook keeps using the older link until that changes. If machines you already sent have changed, the calculator asks whether to update Notebook. A battery on the calculator shows a rough runtime. A machine that idles high for its kind, or one that's barely on, gets a short note. An encrypted Notebook file stays in Notebook.
+
 ## What's new in 1.3.9
 
 You can send the calculator lab or a planner build to Homelab Notebook. A lab that comes back the other way can be looked at, or saved as your lab, without Pro. Merging it into a lab you already have is part of Pro.

@@ -167,11 +167,15 @@ label.toggle{min-height:48px}
 .notebook-actions{flex-direction:column;align-items:stretch}
 .notebook-actions button{width:100%;text-align:left}
 #notebookImport ul{margin:8px 0 0;padding-left:18px}
-#notebookBanner{margin:0 0 12px}
+#notebookBanner{display:flex;flex-direction:column;align-items:flex-start;gap:0.75rem;margin:0 0 0.75rem;line-height:1.35}
+#notebookBanner span{line-height:1.35}
+#notebookBanner #notebookBack{min-height:3rem}
 .skip{position:absolute;left:0.5rem;top:-4rem;z-index:60;background:var(--accent);color:var(--accent-ink);padding:0.6rem 0.8rem;border-radius:0.5rem}
 .skip:focus{top:0.5rem}
 .device-cards,.schedule-cards{display:none}
-.gear-card{border:1px solid var(--line);border-radius:0.75rem;margin:0 0 0.75rem;background:var(--card)}
+.gear-card{border:1px solid var(--line);border-radius:0.75rem;margin:0 0 0.75rem;background:var(--card);overflow:hidden}
+.gear-card>.part-summary,[data-theme="light"] .gear-card>button.part-summary{border:0;border-radius:0;box-shadow:none;background:transparent}
+.gear-card>.waste-note{margin:0;padding:0 12px 8px}
 .gear-card .part-edit{padding:0.5rem 0.75rem 0.75rem}
 .gear-card label{display:flex;flex-direction:column;margin-top:0.5rem}
 .gear-card label.hit{flex-direction:row;align-items:center;min-height:3rem;margin-top:0}
@@ -182,6 +186,11 @@ label.toggle input[type=checkbox],label.toggle input[type=radio],.choice-stack i
 [data-theme="light"] button.part-summary .part-watts,[data-theme="light"] button.part-summary .part-slot{color:var(--muted)}
 footer a,.legal a{min-height:3rem;display:inline-flex;align-items:center}
 .help{font-size:0.875rem}
+.waste-note{display:block;margin:0.35rem 0 0;color:var(--muted);font-size:0.8125rem;font-weight:550;line-height:1.35}
+.ups-block{border:1px solid var(--line);border-radius:0.75rem;padding:0.75rem;margin:0 0 0.75rem}
+.ups-block h3{margin:0 0 0.35rem}
+.ups-hosts{display:flex;flex-direction:column;gap:0.25rem;margin-top:0.5rem}
+#syncPrompt,#upgradeCard{margin-bottom:0.75rem}
 @media(max-width:850px){
  .device-wide,.schedule-wide{display:none}
  .device-cards,.schedule-cards{display:block}
