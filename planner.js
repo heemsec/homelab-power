@@ -997,7 +997,8 @@ function wire() {
       if (calc && (calc.voltageMode === '120' || calc.voltageMode === '230' || calc.voltageMode === 'custom')) circuit = {voltageMode: calc.voltageMode, voltage: Number(calc.voltage), breaker: Number(calc.breaker)};
     } catch {}
     try {
-      await window.PowerShare.sendToNotebook({v: 1, source: 'homelab-power', name: (build.name || 'My build').slice(0, 60), ...circuit, devices});
+      const calcRate = (() => { try { const calc = JSON.parse(localStorage.getItem(CALC_KEY) || 'null'); return Number.isFinite(+calc?.rate) ? +calc.rate : null; } catch { return null; } })();
+      await window.PowerShare.sendToNotebook({v: 1, source: 'homelab-power', name: (build.name || 'My build').slice(0, 60), ...circuit, ...(calcRate == null ? {} : {rate: calcRate}), devices});
       toast('Opened Homelab Notebook in your browser.');
     } catch (err) { toast(err.message || 'Couldn\'t open Homelab Notebook.'); }
   });

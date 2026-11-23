@@ -182,6 +182,11 @@ label.toggle input[type=checkbox],label.toggle input[type=radio],.choice-stack i
 [data-theme="light"] button.part-summary .part-watts,[data-theme="light"] button.part-summary .part-slot{color:var(--muted)}
 footer a,.legal a{min-height:3rem;display:inline-flex;align-items:center}
 .help{font-size:0.875rem}
+.waste-note{display:block;margin-top:0.25rem;color:var(--muted);font-size:0.8125rem;font-weight:550;line-height:1.35}
+.ups-block{border:1px solid var(--line);border-radius:0.75rem;padding:0.75rem;margin:0 0 0.75rem}
+.ups-block h3{margin:0 0 0.35rem}
+.ups-hosts{display:flex;flex-direction:column;gap:0.25rem;margin-top:0.5rem}
+#syncPrompt,#upgradeCard{margin-bottom:0.75rem}
 @media(max-width:850px){
  .device-wide,.schedule-wide{display:none}
  .device-cards,.schedule-cards{display:block}
