@@ -15,6 +15,7 @@ function writeBook(){
  try{localStorage.setItem(KEY,JSON.stringify(book));return true;}catch{$('profileMessage').textContent='The browser couldn\'t save your labs. Copy a share link or a CSV before you leave.';return false;}
 }
 function saveBook(){clearTimeout(bookTimer);return writeBook();}
+if(book&&window.PowerShare){let renamed=false;for(const profile of book.profiles){const next=window.PowerShare.migrateMinilabName(profile.name,profile.presetId);if(next!==profile.name){profile.name=next;renamed=true;}}if(renamed)writeBook();}
 function scheduleBook(){if(!book)return;clearTimeout(bookTimer);bookTimer=setTimeout(writeBook,SAVE_PAUSE);}
 function flushBook(){if(bookTimer)saveBook();}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushBook();});

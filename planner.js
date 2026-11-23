@@ -66,6 +66,12 @@ function loadBook() {
     if (raw && raw.version === 1 && Array.isArray(raw.builds) && raw.builds.length) {
       book = raw;
       if (!book.builds.some(b => b.id === book.activeId)) book.activeId = book.builds[0].id;
+      let renamed = false;
+      for (const build of book.builds) {
+        const next = window.PowerShare.migrateMinilabName(build.name, build.presetId);
+        if (next !== build.name) { build.name = next; renamed = true; }
+      }
+      if (renamed) writeBook();
       return;
     }
   } catch {}
@@ -698,6 +704,7 @@ function applyPreset(preset) {
   build.width = frame?.rackWidth === 19 ? 19 : 10;
   build.heightU = frame?.rackUnits && HEIGHTS.includes(frame.rackUnits) ? frame.rackUnits : (frame?.rackUnits || build.heightU);
   build.name = preset.name;
+  build.presetId = preset.id;
   build.items = preset.items.map(it => {
     const part = partById(it.partId);
     return {uid: uid(), partId: it.partId, qty: it.qty || 1, placement: defaultPlacement(part, build.width), startU: null, idleOverride: null, typicalOverride: null};
