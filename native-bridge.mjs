@@ -10,3 +10,6 @@ if(Capacitor.isNativePlatform()){const Printer=registerPlugin('ReportPrinter');w
 // getState, purchase, restore, and billingUpdate all carry pendingTips: an array of product ids
 // (tip_small, tip_medium, tip_large) that are still pending or not yet consumed.
 if(Capacitor.isNativePlatform()&&Capacitor.isPluginAvailable('PlayBilling')){const Billing=registerPlugin('PlayBilling');window.NativeBilling={getState:()=>Billing.getState(),purchase:productId=>Billing.purchase({productId}),restore:()=>Billing.restore(),onUpdate:fn=>Billing.addListener('billingUpdate',fn)};}
+
+// External pages, such as Homelab Notebook, open in the system browser. Same idea as a target=_blank link.
+if(Capacitor.isNativePlatform()&&Capacitor.isPluginAvailable('Browser')){const Browser=registerPlugin('Browser');window.NativeOpenExternal=url=>Browser.open({url});}

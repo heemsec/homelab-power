@@ -978,6 +978,29 @@ function wire() {
   $('resetPart').addEventListener('click', resetEdit);
   $('closeEdit').addEventListener('click', () => $('editPart').close());
   $('copyBuild').addEventListener('click', () => { copyBuildLink(); });
+  $('sendNotebook').addEventListener('click', async () => {
+    const build = shown();
+    const devices = [];
+    for (const it of build.items) {
+      if (devices.length >= 100) break;
+      const part = partById(it.partId);
+      const w = oneWatts(it);
+      const row = {id: it.uid, name: labelOf(part, it).slice(0, 100), idleW: w.idle, typicalW: w.typical, qty: Math.max(1, Math.min(99, Math.round(it.qty || 1)))};
+      if (it.partId) row.partId = it.partId;
+      const type = window.PowerShare.typeForCategory(part?.category);
+      if (type) row.type = type;
+      devices.push(row);
+    }
+    let circuit = {voltageMode: build.width === 19 ? '230' : '120', voltage: build.width === 19 ? 230 : 120, breaker: build.width === 19 ? 16 : 15};
+    try {
+      const calc = JSON.parse(localStorage.getItem(CALC_KEY) || 'null');
+      if (calc && (calc.voltageMode === '120' || calc.voltageMode === '230' || calc.voltageMode === 'custom')) circuit = {voltageMode: calc.voltageMode, voltage: Number(calc.voltage), breaker: Number(calc.breaker)};
+    } catch {}
+    try {
+      await window.PowerShare.sendToNotebook({v: 1, source: 'homelab-power', name: (build.name || 'My build').slice(0, 60), ...circuit, devices});
+      toast('Opened Homelab Notebook in your browser.');
+    } catch (err) { toast(err.message || 'Couldn\'t open Homelab Notebook.'); }
+  });
   $('copyLink').addEventListener('click', () => { copyBuildLink(); });
   $('saveCopy').addEventListener('click', saveSharedCopy);
   $('nativeShare').addEventListener('click', async () => {
