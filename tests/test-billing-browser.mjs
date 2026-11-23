@@ -13,7 +13,7 @@ const webPort = 8876;
 const wwwPort = 8877;
 const WEB = `http://127.0.0.1:${webPort}/`;
 const WWW = `http://127.0.0.1:${wwwPort}/`;
-const shots = process.env.BILLING_SHOTS || '/opt/cursor/artifacts';
+const shots = process.env.HOMELAB_ARTIFACTS || process.env.BILLING_SHOTS || '/opt/cursor/artifacts';
 mkdirSync(shots, { recursive: true });
 
 function serve(port, cwd) {

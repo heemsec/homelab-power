@@ -4,7 +4,7 @@ import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const out = '/opt/cursor/artifacts';
+const out = process.env.HOMELAB_ARTIFACTS || '/opt/cursor/artifacts';
 const app = spawn('python3', ['-m', 'http.server', '9901'], { cwd: root, stdio: 'ignore' });
 const before = spawn('python3', ['-m', 'http.server', '9902'], { cwd: '/tmp/calc-before', stdio: 'ignore' });
 await Promise.all([once(app, 'spawn'), once(before, 'spawn')]);

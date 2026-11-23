@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const port = 8907;
 const base = `http://127.0.0.1:${port}`;
-const shots = '/opt/cursor/artifacts';
+const shots = process.env.HOMELAB_ARTIFACTS || '/opt/cursor/artifacts';
 mkdirSync(shots, { recursive: true });
 const vectors = JSON.parse(readFileSync(new URL('../interop/test-vectors.json', import.meta.url), 'utf8'));
 const server = spawn('python3', ['-m', 'http.server', String(port)], { cwd: root, stdio: 'ignore' });

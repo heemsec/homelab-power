@@ -15,7 +15,7 @@
 
 .page-intro{max-width:none;padding-top:var(--space-3)}
 header.home-banner{min-height:78px;padding:16px 20px 12px;background:#0B1628;color:#fff;border-bottom:0}
-header.home-banner .brand{letter-spacing:0;font-size:22px;font-weight:650;color:#fff;align-items:center;gap:12px}
+header.home-banner .brand{letter-spacing:0;font-size:1.375rem;font-weight:650;color:#fff;align-items:center;gap:12px}
 header.home-banner .home-lockup{display:flex;flex-direction:column;gap:2px;min-width:0}
 header.home-banner .home-name{letter-spacing:0;line-height:1.1}
 header.home-banner .home-name b{color:#7EC8F2;font-weight:700}
@@ -31,9 +31,9 @@ header.home-banner #theme{border:1px solid #7EC8F2;color:#fff;min-height:3rem;pa
 .subtabs button>span,.subtabs small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2}
 .subtabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:transparent}
 .subtabs button:hover,.subtabs button:active{transform:none}
-.subtabs small{font-size:11px;font-weight:550;opacity:.85}
-.build-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:4px 0 12px}
-.build-head h1{font-size:28px;letter-spacing:-.8px;margin:0}
+.subtabs small{font-size:0.7rem;font-weight:550;opacity:.85}
+.build-head{display:flex;justify-content:space-between;align-items:baseline;gap:0.75rem;margin:0.25rem 0 0.75rem}
+.build-head h1{font-size:1.75rem;letter-spacing:-0.03em;margin:0}
 .build-head p{margin:0}
 .part-summary{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:transparent;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-height:48px;box-shadow:none}
 .part-summary b{flex:1;min-width:0;font-weight:650}
@@ -116,7 +116,7 @@ body.is-dragging{cursor:grabbing;user-select:none}
 }
 @media(max-width:680px){
  .totals-bar strong{font-size:22px}
- .page-intro h1{font-size:32px;letter-spacing:-1px}
+ .page-intro h1,.page-intro h2{font-size:2rem;letter-spacing:-0.03em}
 }
 
 /* Palettes. Sky Blue is the default in styles.css. These override it. */
@@ -174,9 +174,12 @@ label.toggle{min-height:48px}
 .gear-card{border:1px solid var(--line);border-radius:0.75rem;margin:0 0 0.75rem;background:var(--card)}
 .gear-card .part-edit{padding:0.5rem 0.75rem 0.75rem}
 .gear-card label{display:flex;flex-direction:column;margin-top:0.5rem}
+.gear-card label.hit{flex-direction:row;align-items:center;min-height:3rem;margin-top:0}
 .hit{min-height:3rem;display:flex;flex-direction:row;align-items:center;gap:0.75rem}
-.hit input{width:1.5rem;height:1.5rem;min-height:1.5rem;margin:0}
-input[type=radio]{width:1.5rem;height:1.5rem;min-height:1.5rem}
+label.toggle input[type=checkbox],label.toggle input[type=radio],.choice-stack input[type=radio],.hit input[type=checkbox]{width:1.375rem;height:1.375rem;min-width:1.375rem;min-height:1.375rem;margin:0;flex:none;accent-color:var(--accent)}
+[data-theme="light"] button.part-summary{background:transparent;color:var(--text);border:1px solid var(--line);box-shadow:none}
+[data-theme="light"] button.part-summary b{color:var(--text)}
+[data-theme="light"] button.part-summary .part-watts,[data-theme="light"] button.part-summary .part-slot{color:var(--muted)}
 footer a,.legal a{min-height:3rem;display:inline-flex;align-items:center}
 .help{font-size:0.875rem}
 @media(max-width:850px){
