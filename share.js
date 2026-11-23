@@ -280,6 +280,24 @@ function upgradePayback(upgrade){
  if(!(month>0))return null;
  return Number(upgrade.price)/month;
 }
+function paybackPhrase(months){
+ if(months==null||!(months>0))return '';
+ if(months<0.5)return 'less than a month';
+ if(months<24){
+  const n=Math.max(1,Math.round(months));
+  return `about ${n} month${n===1?'':'s'}`;
+ }
+ const years=months/12;
+ const whole=Math.round(years);
+ if(Math.abs(years-whole)<0.25)return `about ${whole} year${whole===1?'':'s'}`;
+ const half=Math.round(years*2)/2;
+ if(Math.abs(years-half)<0.15&&half%1!==0){
+  const y=Math.floor(half);
+  return y<1?'about 6 months':`about ${y} and a half years`;
+ }
+ const shown=Math.round(years*10)/10;
+ return `about ${shown} years`;
+}
 function wasteFlags(device){
  if(!device||device.type==='vm'||device.type==='lxc')return [];
  const flags=[];
@@ -330,5 +348,5 @@ async function sendToNotebook(payload){
   return url;
  }catch{throw Error('Couldn\'t open Homelab Notebook.');}
 }
-return {compact,sanitize,encode,decode,migrateMinilabName,isLegacyMinilabName,encodeInterop,decodeInterop,devicesFromInterop,circuitFromInterop,interopAccess,typeForCategory,sendToNotebook,NOTEBOOK_ORIGIN,EMIT_INTEROP_V2,shouldApplyRate,upsRuntimeHours,upgradePayback,wasteFlags,deviceFingerprint,changedDeviceCount,encryptedLinkMessage,TYPICAL_IDLE};
+return {compact,sanitize,encode,decode,migrateMinilabName,isLegacyMinilabName,encodeInterop,decodeInterop,devicesFromInterop,circuitFromInterop,interopAccess,typeForCategory,sendToNotebook,NOTEBOOK_ORIGIN,EMIT_INTEROP_V2,shouldApplyRate,upsRuntimeHours,upgradePayback,paybackPhrase,wasteFlags,deviceFingerprint,changedDeviceCount,encryptedLinkMessage,TYPICAL_IDLE};
 });

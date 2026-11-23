@@ -86,7 +86,13 @@ test('runtime, waste flags, payback, and an encrypted Notebook file', () => {
   assert.equal(Share.shouldApplyRate({region: 'US-CA', rate: 0.2}), false);
   assert.equal(Share.shouldApplyRate({region: null, rate: 0.3}), false);
   const month = (13.4 - 8) * 24 / 1000 * (365 / 12) * 0.2;
-  assert.ok(Math.abs(Share.upgradePayback({currentW: 13.4, newW: 8, price: 200, rate: 0.2, hours: 24}) - 200 / month) < 1e-9);
+  const months = Share.upgradePayback({currentW: 13.4, newW: 8, price: 200, rate: 0.2, hours: 24});
+  assert.ok(Math.abs(months - 200 / month) < 1e-9);
+  assert.equal(Share.paybackPhrase(months), 'about 21 years');
+  assert.equal(Share.paybackPhrase(18), 'about 18 months');
+  assert.equal(Share.paybackPhrase(1), 'about 1 month');
+  assert.equal(Share.paybackPhrase(30), 'about 2 and a half years');
+  assert.equal(Share.paybackPhrase(null), '');
   const saved = Share.deviceFingerprint([{id: 'a', name: 'Pi', type: 'pi', idle: 3, load: 8}]);
   assert.equal(Share.changedDeviceCount(saved, [{id: 'a', name: 'Pi', type: 'pi', idle: 3, load: 8}]), 0);
   assert.equal(Share.changedDeviceCount(saved, [{id: 'a', name: 'Pi', type: 'pi', idle: 4, load: 8}]), 1);
